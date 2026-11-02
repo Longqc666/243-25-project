@@ -4,7 +4,7 @@
 
 组号：25　项目：花店管理系统　组长：庞华杰
 
-仓库链接：[地址](https://github.com/Longqc666/243-25-project)　Projects链接：待填　课程账号访问检查：仓库待填；看板Read待填
+仓库链接：[地址](https://github.com/Longqc666/243-25-project)　Projects链接：[地址](https://github.com/users/Longqc666/projects/7)　课程账号访问检查：仓库待填；看板Read待填
 
 ## 分工
 
