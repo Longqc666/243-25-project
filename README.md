@@ -15,7 +15,7 @@
 | 庞华杰 | 发布花束用例 | [地址](https://github.com/Longqc666/243-25-project/issues/1) |
 | 庞延新 | 检索并查看花束用例 | [地址](https://github.com/Longqc666/243-25-project/issues/2) |
 | 何奕佳 | 预订下单用例 | [#3](https://github.com/Longqc666/243-25-project/issues/3) |
-| 林伟翔 | 取消订单用例 | 待创建 |
+| 林伟翔 | 取消订单用例 | [#4](https://github.com/Longqc666/243-25-project/issues/4) |
 
 ## 成果入口
 
