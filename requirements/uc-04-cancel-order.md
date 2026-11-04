@@ -7,8 +7,6 @@
 
 ![花店管理系统用例图](images/usecase-flower-shop.png)
 
-（与 UC-03 引用同一张小组用例图，源文件与导出路径见 `requirements/use-cases.md`，待上传后此图生效。）
-
 ## 1 用例基本信息
 
 | 字段 | 内容 |
