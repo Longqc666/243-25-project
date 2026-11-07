@@ -50,13 +50,13 @@
 工具：DeepSeek Harness（deepseek-flash）；原始对话保存在本机 DSH 会话记录中。
 
 **2026-11-02　UC-03 初稿与用例图**
-- 输入：第 1 次课任务单、小组工作表、\equirements.md\ 的 FR-01～FR-08 与 NFR-01～NFR-03。
+- 输入：第 1 次课任务单、小组工作表、`requirements.md` 的 FR-01～FR-08 与 NFR-01～NFR-03。
 - 输出：UC-03 详细用例初稿（12 字段、9 步流程、6 个异常、8 条验收条件）与花店管理系统用例图 PNG。
-- 采用：修改后采纳。用例正文写入 \equirements/uc-03-place-order.md\（提交 5cd7f94）；用例图先以 \equirements/images/usecase-flower-shop.png\ 提交（e28d312），后由组内 v0.2 版本替换，旧图不计为最终成果。
+- 采用：修改后采纳。用例正文写入 `requirements/uc-03-place-order.md`（提交 5cd7f94）；用例图先以 `requirements/images/usecase-flower-shop.png` 提交（e28d312），后由组内 v0.2 版本替换，旧图不计为最终成果。
 - 人工核验：字段、编号与 FR/NFR 对应关系由本人在提交前确认；未运行应用，未编造测试、访谈或互评记录。
 
 **2026-11-07　按互评意见修订幂等判重顺序**
-- 输入：Issue #3 的组长检查意见与 victory0703 的互评意见、\use-cases.md\ 新编号表（UC-01～UC-08）、\scope.md\ 的 Q-01～Q-12。
+- 输入：Issue #3 的组长检查意见与 victory0703 的互评意见、`use-cases.md` 新编号表（UC-01～UC-08）、`scope.md` 的 Q-01～Q-12。
 - 输出：把幂等判重从第 6 步提前到第 3 步，新增 AC-UC03-09（库存已被首单清零后同一请求重试仍返回首次订单），同步异常分支编号与成果位置表述。
 - 采用：采纳。提交 6f9c752；理由：原顺序下库存为 0 的重试会被判“售罄”，与 NFR-02 冲突。
 - 人工核验：对照 Q-02/Q-03 编号与 UC-06/UC-07/UC-08 名称逐处检查；未运行应用，未记为已通过。
