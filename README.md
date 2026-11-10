@@ -25,7 +25,6 @@
 - [数据库设计目录](database/README.md)
 - [软件设计目录](design/README.md)
 - [大模型使用记录](records/ai-use.md)
-- [UC-02 检索花束](requirements/uc-02-search-bouquets.md) / [UC-06 查看花束详情](requirements/uc-06-view-bouquet.md)（庞延新）
 - [检索与详情规则落实及日期后续安排（2026-11-07）](records/rules-uc02-uc06-2026-11-07.md)
 
 课堂登记使用材料包中的03_第1次课小组工作表.docx，引用这里的实际成果与Issue检查记录，无需另写第二份登记表。
