@@ -77,3 +77,9 @@
 - 输出：UC-04 详细用例 v0.2（12 字段、9 步流程、6 个异常场景、11 条验收条件）与取消流程示意代码（requirements/uc-04-cancel-order-code.md）。
 - 采用：修改后采纳。可取消时限方案取舍（定为送达日期 0:00 前）、Issue #4 评审意见处理结果由本人决策确认；用例正文经本人逐字段核对后上传（提交 083403f）；示意代码仅作评审参考，非交付实现。
 - 人工核验：验收条件与 FR/NFR 编号逐条对照；能在走读中说明判重顺序与时限取值的理由；本地演示程序用于走查取消分支，仅作需求走读、不作为验收执行记录；未运行正式测试。
+
+- **2026-11-14　实验二 T2/T7 订单状态与库存流水域**
+- 输入：database/README.md 的分工与建模约定、requirements/requirements.md 的 FR-07、本人实验一 UC-04 v0.2 成果与本地演示程序表结构（cancelKey、cancelTime 等字段）、B-05/B-06、NFR-02/03。
+- 输出：er/domain-order-status.md（实体清单）与 schema/order-status.md（表结构与数据字典）v0.1，含两张流水表（order_status_log、stock_change）与核心约束 UNIQUE(order_id, change_type)、after_qty>=0；按组长建模约定修订外键命名（operator_id→user_id）与状态枚举口径（不引入"新建"占位）。
+- 采用：采纳。修订理由是使命名与状态枚举符合建模约定 1、3；跨域接口字段待庞延新、何奕佳确认后进 ER 合并。
+- 人工核验：字段来源逐条对照 FR/B/NFR 编号；唯一约束与 CHECK 对应的业务行为已在本地演示程序中验证（取消只回补一次、剩余量不为负）；未运行建表语句。
