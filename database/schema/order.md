@@ -1,6 +1,6 @@
 # 订单域 —— 表结构与数据字典
 
-> 实验二 · 数据库设计 ｜ 主责人：何奕佳 ｜ 交叉检查：林伟翔 ｜ 版本 v0.1 · 2026-11-16
+> 实验二 · 数据库设计 ｜ 主责人：何奕佳 ｜ 交叉检查：林伟翔 ｜ 版本 v0.2 · 2026-11-17
 > 依据：[订单域实体清单](../er/domain-order.md) v0.1、[database/README.md](../README.md) 建模约定
 > 基线：FR-05（主）、FR-06、FR-08；B-05、B-06、B-08；NFR-01、NFR-02、NFR-03
 
@@ -19,9 +19,9 @@
 
 | 字段名 | 含义 | 类型与长度 | 可空 | 默认值 | 约束 | 来源 |
 |---|---|---|---|---|---|---|
-| id | 主键 | BIGINT AUTO_INCREMENT | 否 | 自增 | PRIMARY KEY | 建模约定 4 |
+| id | 主键 | BIGINT UNSIGNED AUTO_INCREMENT | 否 | 自增 | PRIMARY KEY | 建模约定 4 |
 | order_no | 对外订单号 | VARCHAR(32) | 否 | — | **UNIQUE** | UC-03 P1；FR-06 |
-| user_id | 下单顾客 | BIGINT | 否 | — | FOREIGN KEY → user(id)；INDEX (user_id, created_at) | FR-05、FR-08 |
+| user_id | 下单顾客 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → user(id)；INDEX (user_id, created_at) | FR-05、FR-08 |
 | status | 订单状态 | VARCHAR(16) | 否 | '有效' | **CHECK ∈（有效/已取消/已完成）**；INDEX | FR-06、FR-07；Q-10 |
 | total_amount | 金额合计（元） | DECIMAL(10,2) | 否 | — | CHECK (total_amount >= 0) | FR-05；B-08 |
 | delivery_date | 送达/自提日期 | DATE | 否 | — | — | FR-05；Q-03 |
@@ -52,9 +52,9 @@
 
 | 字段名 | 含义 | 类型与长度 | 可空 | 默认值 | 约束 | 来源 |
 |---|---|---|---|---|---|---|
-| id | 主键 | BIGINT AUTO_INCREMENT | 否 | 自增 | PRIMARY KEY | 建模约定 4 |
-| order_id | 所属订单 | BIGINT | 否 | — | FOREIGN KEY → orders(id)；**UNIQUE (order_id, bouquet_id)** | FR-05、FR-06 |
-| bouquet_id | 花束 | BIGINT | 否 | — | FOREIGN KEY → bouquet(id)；INDEX | FR-05（庞延新域） |
+| id | 主键 | BIGINT UNSIGNED AUTO_INCREMENT | 否 | 自增 | PRIMARY KEY | 建模约定 4 |
+| order_id | 所属订单 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → orders(id)；**UNIQUE (order_id, bouquet_id)** | FR-05、FR-06 |
+| bouquet_id | 花束 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → bouquet(id)；INDEX | FR-05（庞延新域） |
 | quantity | 预订数量（束） | INT | 否 | — | **CHECK (quantity BETWEEN 1 AND 99)** | Q-02；FR-05 |
 | unit_price | 单价快照（元/束） | DECIMAL(10,2) | 否 | — | **CHECK (unit_price > 0)** | **B-08**；FR-05 |
 | amount | 行金额（元） | DECIMAL(10,2) | 否 | — | CHECK (amount >= 0)；= quantity × unit_price | FR-05 |
@@ -100,9 +100,9 @@
 
 ```sql
 CREATE TABLE orders (
-  id              BIGINT        NOT NULL AUTO_INCREMENT,
+  id              BIGINT UNSIGNED        NOT NULL AUTO_INCREMENT,
   order_no        VARCHAR(32)   NOT NULL,
-  user_id         BIGINT        NOT NULL,
+  user_id         BIGINT UNSIGNED        NOT NULL,
   status          VARCHAR(16)   NOT NULL DEFAULT '有效',
   total_amount    DECIMAL(10,2) NOT NULL,
   delivery_date   DATE          NOT NULL,
@@ -124,9 +124,9 @@ CREATE TABLE orders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE order_item (
-  id          BIGINT        NOT NULL AUTO_INCREMENT,
-  order_id    BIGINT        NOT NULL,
-  bouquet_id  BIGINT        NOT NULL,
+  id          BIGINT UNSIGNED        NOT NULL AUTO_INCREMENT,
+  order_id    BIGINT UNSIGNED        NOT NULL,
+  bouquet_id  BIGINT UNSIGNED        NOT NULL,
   quantity    INT           NOT NULL,
   unit_price  DECIMAL(10,2) NOT NULL,
   amount      DECIMAL(10,2) NOT NULL,
@@ -148,7 +148,7 @@ CREATE TABLE order_item (
 
 | 本域字段 | 引用/使用方 | 约定 |
 |---|---|---|
-| `orders.id` | `order_status_log.order_id`、`stock_change.order_id` | BIGINT 对齐；订单不删除，故流水外键不会被置空 |
+| `orders.id` | `order_status_log.order_id`、`stock_change.order_id` | BIGINT UNSIGNED 对齐；订单不删除，故流水外键不会被置空 |
 | `orders.status` | `order_status_log.from_status/to_status` | **每次状态变化写一行日志**；取消写 `('有效' → '已取消')` |
 | `orders.cancelled_at` | — | 与状态日志中的取消时间保持同一事务内一致 |
 | `order_item.bouquet_id` | `stock_change.bouquet_id` | 同一事务内两者的 `bouquet_id` 必须相同（跨表，应用层保证） |
@@ -179,3 +179,4 @@ CREATE TABLE order_item (
 | 版本 | 日期 | 内容 | 修改人 |
 |---|---|---|---|
 | v0.1 | 2026-11-16 | 建立 orders、order_item 表结构与数据字典：字段六要素、索引外键清单、约束落点对照、参考 DDL、跨域接口与待确认项 | 何奕佳 |
+| v0.2 | 2026-11-17 | 按统稿决定 D-01 把 `orders.id`、`user_id` 及 `order_item` 的主外键类型全部改为 `BIGINT UNSIGNED`，参考 DDL 同步；与 `schema/user.md` 和流水域外键目标对齐 | 何奕佳 |
