@@ -1,4 +1,4 @@
-# 概念 ER 图（总体）
+﻿# 概念 ER 图（总体）
 
 > 实验二 · 数据库设计 ｜ 主责人：庞华杰（总体框架与合并）｜ 版本 v0.1 · 2026-11-17
 > 依据：[database/README.md](../README.md) 分工与建模约定、[需求简表](../../requirements/requirements.md)、[用例对应](../../requirements/use-cases.md)
@@ -8,7 +8,7 @@
 
 本图覆盖四项核心业务（发布花束、检索与查看、预订下单、取消订单）及其支撑能力（登录与角色、我的订单）所需保存的信息，共 **10 个实体、13 个联系**。支付、退款、物流、评价等需求阶段已排除的项不建实体。
 
-概念图只画实体名、标识与关键属性，完整字段、类型与约束见第 3 章及各域数据字典；表间的主外键连接见 [schema/relations.md](../schema/relations.md)（由 T8 汇总，本人域局部图见 [user-relations.png](../schema/user-relations.png)）。
+概念图只画实体名、标识与关键属性，完整字段、类型与约束见第 3 章及各域数据字典；表间主外键连接由 T8 汇总为 schema/relations.md（待花束域定稿后提交），本人域的局部图见 [user-relations.png](../schema/user-relations.png)。
 
 ## 2 图
 
