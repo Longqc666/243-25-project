@@ -1,6 +1,6 @@
 # 订单域 —— 实体、属性与业务规则清单
 
-> 实验二 · 数据库设计 ｜ 主责人：何奕佳（订单域）｜ 版本 v0.1 · 2026-11-16
+> 实验二 · 数据库设计 ｜ 主责人：何奕佳（订单域）｜ 版本 v0.2 · 2026-11-17
 > 需求基线：FR-05（主）、FR-06、FR-08；B-05、B-06、B-08；NFR-01、NFR-02、NFR-03 ｜ 依据：`database/README.md` 分工与建模约定
 > 交叉确认：`orders.status` / `orders.idempotency_key`（林伟翔，流水域）、`order_item.bouquet_id`（庞延新，花束域）、`orders.user_id`（庞华杰，用户域）
 
@@ -20,7 +20,7 @@
 
 ### 2.1 标识
 
-- 主键：`id`（BIGINT，代理主键，AUTO_INCREMENT）。
+- 主键：`id`（BIGINT UNSIGNED，代理主键，AUTO_INCREMENT）。
 - 业务标识：`order_no`（VARCHAR(32)，UNIQUE）——对外展示的订单号，避免把自增主键暴露给顾客；UC-03 的成功后置条件 P1 要求"订单号"。
 - 幂等标识：`idempotency_key`（VARCHAR(64)，UNIQUE）——由提交端生成的请求标识，重复请求命中后直接返回首次结果（UC-03 A5）。
 
@@ -28,9 +28,9 @@
 
 | 属性 | 类型 | 可空 | 含义 | 来源依据 |
 |---|---|---|---|---|
-| id | BIGINT, AUTO_INCREMENT | 否 | 主键 | 建模约定 4 |
+| id | BIGINT UNSIGNED, AUTO_INCREMENT | 否 | 主键 | 建模约定 4 |
 | order_no | VARCHAR(32) | 否 | 对外订单号，如 SO202611150001 | UC-03 P1；FR-06 |
-| user_id | BIGINT | 否 | 下单顾客，外键 → user.id，取自登录态，不接受前端传入 | FR-05、FR-08；B-03 |
+| user_id | BIGINT UNSIGNED | 否 | 下单顾客，外键 → user.id，取自登录态，不接受前端传入 | FR-05、FR-08；B-03 |
 | status | VARCHAR(16) | 否 | 订单状态，默认"有效"；CHECK ∈（有效 / 已取消 / 已完成） | FR-06、FR-07；Q-10（本期仅两态流转） |
 | total_amount | DECIMAL(10,2) | 否 | 订单金额合计（元），下单时确定，等于明细金额之和 | FR-05；B-08 |
 | delivery_date | DATE | 否 | 送达或自提日期 | FR-05；Q-03（窗口暂定） |
@@ -53,16 +53,16 @@
 
 ### 3.1 标识
 
-- 主键：`id`（BIGINT，代理主键，AUTO_INCREMENT）。
+- 主键：`id`（BIGINT UNSIGNED，代理主键，AUTO_INCREMENT）。
 - 业务唯一性：`UNIQUE (order_id, bouquet_id)`——同一订单内同一花束只出现一行；当前业务为"一单一花束"，该约束同时防止同一订单重复写入明细。
 
 ### 3.2 属性清单
 
 | 属性 | 类型 | 可空 | 含义 | 来源依据 |
 |---|---|---|---|---|
-| id | BIGINT, AUTO_INCREMENT | 否 | 主键 | 建模约定 4 |
-| order_id | BIGINT | 否 | 所属订单，外键 → orders.id | FR-05、FR-06 |
-| bouquet_id | BIGINT | 否 | 花束，外键 → bouquet.id | FR-05（庞延新域） |
+| id | BIGINT UNSIGNED, AUTO_INCREMENT | 否 | 主键 | 建模约定 4 |
+| order_id | BIGINT UNSIGNED | 否 | 所属订单，外键 → orders.id | FR-05、FR-06 |
+| bouquet_id | BIGINT UNSIGNED | 否 | 花束，外键 → bouquet.id | FR-05（庞延新域） |
 | quantity | INT | 否 | 预订数量（束），CHECK 1—99 | Q-02；FR-05 |
 | unit_price | DECIMAL(10,2) | 否 | **下单时单价快照**（元/束），CHECK > 0 | **B-08**；FR-05 |
 | amount | DECIMAL(10,2) | 否 | 行金额 = quantity × unit_price | FR-05 |
@@ -101,10 +101,10 @@
 
 | 接口 | 对方域 | 约定内容 |
 |---|---|---|
-| `orders.user_id` → `user.id` | 庞华杰（用户与角色域） | 主键统一 BIGINT；顾客身份取自登录态，不由前端传入 |
+| `orders.user_id` → `user.id` | 庞华杰（用户与角色域） | 主键统一 BIGINT UNSIGNED；顾客身份取自登录态，不由前端传入 |
 | `order_item.bouquet_id` → `bouquet.id` | 庞延新（花束与库存域） | 下单同一事务内：条件更新 `bouquet.stock_qty` 并写 `stock_change`（`change_type='下单扣减'`，`delta=-N`） |
 | `orders.status` / `cancelled_at` | 林伟翔（状态与库存流水域） | **每次状态变化写一行 `order_status_log`**；取消时同时写 `stock_change`（`change_type='取消回补'`，`delta=+N`），三处同事务 |
-| `orders.id` | 林伟翔（状态与库存流水域） | `order_status_log.order_id` 与 `stock_change.order_id` 的外键目标，类型 BIGINT 对齐 |
+| `orders.id` | 林伟翔（状态与库存流水域） | `order_status_log.order_id` 与 `stock_change.order_id` 的外键目标，类型 BIGINT UNSIGNED 对齐 |
 
 **跨表一致性说明**：`stock_change.bouquet_id` 必须等于对应订单明细的 `order_item.bouquet_id`，MySQL 无法用跨表 CHECK 表达，由下单/取消事务在写入时带出，属应用层责任（走查中写明）。
 
@@ -134,3 +134,4 @@
 | 版本 | 日期 | 内容 | 修改人 |
 |---|---|---|---|
 | v0.1 | 2026-11-16 | 建立订单域实体清单：orders / order_item 的标识、属性、约束、联系基数、跨域接口与待确认项 | 何奕佳 |
+| v0.2 | 2026-11-17 | 按统稿决定 D-01 把本域所有主键与外键类型改为 `BIGINT UNSIGNED`，与 `schema/user.md` 对齐 | 何奕佳 |
