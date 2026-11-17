@@ -1,6 +1,6 @@
 # 订单域 —— 表结构与数据字典
 
-> 实验二 · 数据库设计 ｜ 主责人：何奕佳 ｜ 交叉检查：林伟翔 ｜ 版本 v0.2 · 2026-11-17
+> 实验二 · 数据库设计 ｜ 主责人：何奕佳 ｜ 交叉检查：林伟翔 ｜ 版本 v0.3 · 2026-11-17
 > 依据：[订单域实体清单](../er/domain-order.md) v0.1、[database/README.md](../README.md) 建模约定
 > 基线：FR-05（主）、FR-06、FR-08；B-05、B-06、B-08；NFR-01、NFR-02、NFR-03
 
@@ -26,14 +26,17 @@
 | total_amount | 金额合计（元） | DECIMAL(10,2) | 否 | — | CHECK (total_amount >= 0) | FR-05；B-08 |
 | delivery_date | 送达/自提日期 | DATE | 否 | — | — | FR-05；Q-03 |
 | fulfillment_type | 履约方式 | VARCHAR(8) | 否 | — | CHECK ∈（自提/配送） | FR-05 |
-| idempotency_key | 幂等键 | VARCHAR(64) | 否 | — | **UNIQUE** | NFR-02；UC-03 A5 |
+| idempotency_key | 下单请求幂等键 | VARCHAR(64) | 否 | — | **UNIQUE** | NFR-02；UC-03 A5 |
+| cancel_idempotency_key | 取消请求幂等键 | VARCHAR(64) | 是 | NULL | **UNIQUE**；未取消为 NULL | NFR-02；UC-04 A3/A5 |
 | created_at | 下单时间 | DATETIME | 否 | CURRENT_TIMESTAMP | — | FR-05、FR-06 |
 | cancelled_at | 取消时间 | DATETIME | 是 | NULL | 取消时写入一次；未取消为 NULL | FR-07；B-06 |
 | updated_at | 最后更新时间 | DATETIME | 否 | CURRENT_TIMESTAMP ON UPDATE | — | 建模约定 1 |
 
 **其他约束与说明**
 
-- `UNIQUE (idempotency_key)`：NFR-02 的落点。同一请求重复到达时，第二次插入直接冲突，应用返回首次订单（AC-UC03-09 要求"不得改判为售罄"）。
+- `UNIQUE (idempotency_key)`：**下单**请求的幂等落点。重复到达时第二次插入直接冲突，应用返回首次订单（AC-UC03-09 要求"不得改判为售罄"）。
+- `UNIQUE (cancel_idempotency_key)`：**取消**请求的幂等落点，与下单分开（回应接口核对 I-04）。未取消时为 NULL，MySQL 唯一索引对 NULL 不去重；取消时写入调用方生成的取消请求键，同一取消请求重试命中同键即返回同一结果、不再回补；不同键的重复取消由状态条件更新挡住（影响 0 行）。
+- **金额上限与精度**（回应 I-10）：`DECIMAL(10,2)` 上限 99,999,999.99 元。单价暂定上限 99,999.99 元/束、数量 ≤ 99，行金额最大约 9,899,999.01 元，合计同量级，不会溢出；单价业务上限列入待确认项 7。
 - `UNIQUE (order_no)`：业务标识唯一；订单号由应用生成（`SO + yyyyMMdd + 4 位序列`，见待确认项 1）。
 - `status` 三值 CHECK：按 Q-10，本期只产生"有效 → 已取消"一次流转，"已完成"仅为占位值，不产生流转；该占位与 `database/README.md` 建模约定 3 一致，但与 Q-10 的"两态"表述存在口径差异，见待确认项 5。
 - 取消采用**条件更新**：`UPDATE orders SET status='已取消', cancelled_at=NOW() WHERE id=? AND status='有效'`；影响行数为 0 表示已取消或不存在，不再回补（UC-04 A3/A5）。
@@ -53,18 +56,18 @@
 | 字段名 | 含义 | 类型与长度 | 可空 | 默认值 | 约束 | 来源 |
 |---|---|---|---|---|---|---|
 | id | 主键 | BIGINT UNSIGNED AUTO_INCREMENT | 否 | 自增 | PRIMARY KEY | 建模约定 4 |
-| order_id | 所属订单 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → orders(id)；**UNIQUE (order_id, bouquet_id)** | FR-05、FR-06 |
+| order_id | 所属订单 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → orders(id)；**UNIQUE (order_id)**（本期一单一花束） | FR-05、FR-06 |
 | bouquet_id | 花束 | BIGINT UNSIGNED | 否 | — | FOREIGN KEY → bouquet(id)；INDEX | FR-05（庞延新域） |
 | quantity | 预订数量（束） | INT | 否 | — | **CHECK (quantity BETWEEN 1 AND 99)** | Q-02；FR-05 |
-| unit_price | 单价快照（元/束） | DECIMAL(10,2) | 否 | — | **CHECK (unit_price > 0)** | **B-08**；FR-05 |
-| amount | 行金额（元） | DECIMAL(10,2) | 否 | — | CHECK (amount >= 0)；= quantity × unit_price | FR-05 |
+| unit_price | 单价快照（元/束） | DECIMAL(10,2) | 否 | — | **CHECK (unit_price > 0 AND unit_price <= 99999.99)** | **B-08**；FR-05 |
+| amount | 行金额（元） | DECIMAL(10,2) | 否 | — | **CHECK (amount = ROUND(quantity * unit_price, 2))** | FR-05；I-10 |
 | created_at | 创建时间 | DATETIME | 否 | CURRENT_TIMESTAMP | — | 建模约定 1 |
 
 **其他约束与说明**
 
-- `UNIQUE (order_id, bouquet_id)`：同一订单内同一花束只一行；当前业务一单一花束，该约束同时防止重复写入明细。
+- `UNIQUE (order_id)`：本期一单一花束，用单列唯一键**强制**"一单恰好一条明细"（回应接口核对 I-03）；扩多花束时改为 `UNIQUE (order_id, bouquet_id)`，并同步流水域 `UNIQUE(order_id, change_type)` 的去重粒度。
 - `quantity` 的上界 1—99 是 Q-02 的落点；**"不超过剩余量"不由本表约束**——那需要读取 `bouquet.stock_qty`，由下单事务的条件更新保证（见第 5 节）。
-- `unit_price` 写入后不再更新；`amount` 由应用写入且与 `quantity × unit_price` 一致（不建生成列，避免与"快照"语义混淆；若改生成列需在字典注明）。
+- `unit_price` 写入后不再更新；`amount` 由应用写入，其与 `quantity × unit_price` 的等式**由行内 CHECK 校验**（同表列可参与 CHECK），不再只靠应用自律；不建生成列以避免与"快照"语义混淆。
 - 外键均 `ON DELETE RESTRICT`：订单与花束都不物理删除，历史明细不得悬空。
 
 ## 4 索引与外键清单
@@ -73,10 +76,11 @@
 |---|---|---|---|
 | `pk_orders` | 主键 | id | — |
 | `uk_orders_no` | 唯一 | order_no | 按单号查询、防重 |
-| `uk_orders_idem` | 唯一 | idempotency_key | **NFR-02 幂等** |
+| `uk_orders_idem` | 唯一 | idempotency_key | **下单幂等**（NFR-02） |
+| `uk_orders_cancel_idem` | 唯一 | cancel_idempotency_key | **取消幂等**（NFR-02、I-04） |
 | `idx_orders_user_created` | 普通 | (user_id, created_at) | UC-08 本人订单按下单时间倒序 |
 | `idx_orders_status` | 普通 | status | UC-08 状态筛选 |
-| `uk_item_order_bouquet` | 唯一 | (order_id, bouquet_id) | 防重复明细 |
+| `uk_item_order` | 唯一 | order_id | **一单恰好一条明细**（I-03） |
 | `idx_item_bouquet` | 普通 | bouquet_id | 按花束查历史订单 |
 | `fk_orders_user` | 外键 | orders.user_id → user(id) | 归属校验的基础（不代替越权判断） |
 | `fk_item_order` | 外键 | order_item.order_id → orders(id) | 明细必须挂在订单下 |
@@ -87,7 +91,7 @@
 | 需求约束 | 本域落点 | 相邻域配合 |
 |---|---|---|
 | B-08 下单时单价快照 | `order_item.unit_price` 写入后不更新 | UC-07 改价只影响之后的新订单 |
-| NFR-02 重复提交只产生一次 | `orders.idempotency_key` UNIQUE | `stock_change` 唯一约束再兜一层 |
+| NFR-02 重复提交只产生一次 | 下单：`orders.idempotency_key`；取消：`orders.cancel_idempotency_key` + 状态条件更新 | `stock_change` 唯一约束再兜一层 |
 | Q-02 数量 1—99 束 | `order_item.quantity` CHECK | — |
 | B-05 剩余量非负、与有效订单一致 | 不在本域：数量是否超过剩余量由下单条件更新判断 | `bouquet.stock_qty >= 0` + `stock_change.after_qty >= 0` |
 | B-06 取消只改状态、历史保留 | `orders.status` + `cancelled_at`；无 DELETE | `order_status_log` 只追加；`stock_change` 唯一约束保证只回补一次 |
@@ -108,12 +112,14 @@ CREATE TABLE orders (
   delivery_date   DATE          NOT NULL,
   fulfillment_type VARCHAR(8)   NOT NULL,
   idempotency_key VARCHAR(64)   NOT NULL,
+  cancel_idempotency_key VARCHAR(64) NULL DEFAULT NULL,
   created_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   cancelled_at    DATETIME      NULL DEFAULT NULL,
   updated_at      DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_orders_no   (order_no),
   UNIQUE KEY uk_orders_idem (idempotency_key),
+  UNIQUE KEY uk_orders_cancel_idem (cancel_idempotency_key),
   KEY idx_orders_user_created (user_id, created_at),
   KEY idx_orders_status (status),
   CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES user(id)
@@ -132,15 +138,15 @@ CREATE TABLE order_item (
   amount      DECIMAL(10,2) NOT NULL,
   created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uk_item_order_bouquet (order_id, bouquet_id),
+  UNIQUE KEY uk_item_order (order_id),
   KEY idx_item_bouquet (bouquet_id),
   CONSTRAINT fk_item_order FOREIGN KEY (order_id) REFERENCES orders(id)
     ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT fk_item_bouquet FOREIGN KEY (bouquet_id) REFERENCES bouquet(id)
     ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT ck_item_qty   CHECK (quantity BETWEEN 1 AND 99),
-  CONSTRAINT ck_item_price CHECK (unit_price > 0),
-  CONSTRAINT ck_item_amount CHECK (amount >= 0)
+  CONSTRAINT ck_item_price CHECK (unit_price > 0 AND unit_price <= 99999.99),
+  CONSTRAINT ck_item_amount CHECK (amount = ROUND(quantity * unit_price, 2))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
@@ -160,10 +166,11 @@ CREATE TABLE order_item (
 |---|---|---|---|
 | 1 | `order_no` 生成规则 | `SO + yyyyMMdd + 4 位当日序列`，应用生成 | 唯一键与展示 |
 | 2 | 是否保存 `bouquet_name_snapshot` | 建议追加一列，保证改名/下架后历史订单仍显示下单时名称 | 字段增减 |
-| 3 | 一单多花束 | 暂定一单一花束，结构预留 | 唯一键 (order_id, bouquet_id) 已支持扩展 |
+| 3 | 一单多花束 | 本期一单一花束，用 `UNIQUE (order_id)` 强制；扩多花束时改回复合唯一键并同步流水去重粒度 | 唯一键选型（I-03） |
 | 4 | `total_amount` 是否保留冗余 | 保留：下单时点快照，查询不回算 | 与明细求和的一致性由应用保证 |
-| 5 | 状态枚举是否含"已完成" | 按 Q-10 预留不流转；与 README 约定 3 同时统一 | 两处 CHECK |
-| 6 | 幂等键作用域 | 全局唯一（UUID） | UC-03 A5 的判重语义 |
+| 5 | 状态枚举是否含"已完成" | 已由统稿决定 D-03 定为三值、仅占位不流转 | 两处 CHECK |
+| 7 | 单价的业务上限 | 暂定 99,999.99 元/束（`ck_item_price` 上界），保证行金额不溢出 `DECIMAL(10,2)` | I-10；若调上限需同步金额精度 |
+| 6 | 两个幂等键的作用域 | 下单键与取消键各自全局唯一（UUID），互不复用 | UC-03 A5、UC-04 A3/A5；I-04 |
 
 ## 9 与实验一成果的对应
 
@@ -180,3 +187,4 @@ CREATE TABLE order_item (
 |---|---|---|---|
 | v0.1 | 2026-11-16 | 建立 orders、order_item 表结构与数据字典：字段六要素、索引外键清单、约束落点对照、参考 DDL、跨域接口与待确认项 | 何奕佳 |
 | v0.2 | 2026-11-17 | 按统稿决定 D-01 把 `orders.id`、`user_id` 及 `order_item` 的主外键类型全部改为 `BIGINT UNSIGNED`，参考 DDL 同步；与 `schema/user.md` 和流水域外键目标对齐 | 何奕佳 |
+| v0.3 | 2026-11-17 | 回应跨域接口核对 I-03/I-04/I-10：`UNIQUE(order_id)` 强制一单一条明细；新增 `cancel_idempotency_key` 分离取消幂等作用域；单价加业务上限、行金额改为 CHECK 等式；DDL 与索引同步 | 何奕佳 |
