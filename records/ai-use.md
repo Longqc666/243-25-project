@@ -1,4 +1,4 @@
-# 大模型使用记录
+﻿# 大模型使用记录
 
 本文件保留公共记录字段，并按成员汇总实际AI辅助过程。使用情况、采用决定和人工核验证据按实际填写；未使用者注明“未使用”，不得事后编造交互。
 
@@ -83,3 +83,12 @@
 - 输出：er/domain-order-status.md（实体清单）与 schema/order-status.md（表结构与数据字典）v0.1，含两张流水表（order_status_log、stock_change）与核心约束 UNIQUE(order_id, change_type)、after_qty>=0；按组长建模约定修订外键命名（operator_id→user_id）与状态枚举口径（不引入"新建"占位）。
 - 采用：采纳。修订理由是使命名与状态枚举符合建模约定 1、3；跨域接口字段待庞延新、何奕佳确认后进 ER 合并。
 - 人工核验：字段来源逐条对照 FR/B/NFR 编号；唯一约束与 CHECK 对应的业务行为已在本地演示程序中验证（取消只回补一次、剩余量不为负）；未运行建表语句。
+
+## 庞华杰 2026-11-17 实验二：用户与角色域、总体 ER 与个人报告
+
+- 工具与日期：DeepSeek Harness（deepseek-flash）；2026-11-10 编写分工，2026-11-17 完成本域设计与报告。
+- 输入：requirements/requirements.md、scope.md、use-cases.md；database/README.md 分工与建模约定；何奕佳 schema/order.md 与林伟翔 schema/order-status.md 的已提交版本。
+- 输出：database/README.md 分工与任务（提交 fc11818）；database/er/er-overall.md 与 er-overall.png（10 实体、13 联系）；database/schema/user.md 与 user-relations.png；个人报告 32406300076_庞华杰_实验二.docx；绘图脚本 build_er.py、报告生成脚本 build_report.py。
+- 采用：字段清单与 13 条联系逐条对照 FR、B、NFR 编号后采用；否决 AI 建议的“顾客/商家/管理员三表”方案，改为 `user` 加 `role` 字典；主键类型、状态枚举、流水操作人可空等决定由本人确认后写入 README 9.2。
+- 人工核验：ER 的实体、基数与可选性逐条对照需求与相邻域文件；数据字典与 DDL 只做语法层核对，未执行建表；未编造测试、互评或会议记录。
+- 来源位置：database/er/er-overall.md、database/schema/user.md 及本人实验二报告。
