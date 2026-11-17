@@ -1,6 +1,6 @@
 # 订单状态与库存流水域 —— 表结构与数据字典
 
-> 实验二 · 数据库设计 ｜ 主责人：林伟翔 ｜ 交叉检查：何奕佳 ｜ 版本 v0.1 · 2026-11-14
+> 实验二 · 数据库设计 ｜ 主责人：林伟翔 ｜ 交叉检查：何奕佳 ｜ 版本 v0.2 · 2026-11-17
 > 依据：[实体清单](../er/domain-order-status.md) v0.1、[database/README.md](../README.md) 建模约定
 > 基线：FR-07（主）、FR-05/06/08；B-05、B-06；NFR-02/03；G3
 
@@ -17,15 +17,15 @@
 
 **表用途**：为每笔订单保留完整的状态流转历史。取消（UC-04）把"有效"置为"已取消"时写入一行；本期无其他流转路径（Q-10：状态集合仅"有效/已取消"，"已完成"为占位）。
 
-| 字段名      | 含义               | 类型与长度            | 可空 | 默认值            | 约束                                             | 来源                   |
-| ----------- | ------------------ | --------------------- | ---- | ----------------- | ------------------------------------------------ | ---------------------- |
-| id          | 主键               | BIGINT AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                      | 建模约定 4             |
-| order_id    | 所属订单           | BIGINT                | 否   | —                 | FOREIGN KEY → orders(id)；INDEX                  | FR-06、FR-07；UC-03/04 |
-| from_status | 变更前状态         | VARCHAR(16)           | 是①  | NULL              | CHECK ∈（有效/已取消/已完成）；CHECK ≠ to_status | Q-10；待确认项 2       |
-| to_status   | 变更后状态         | VARCHAR(16)           | 否   | —                 | CHECK ∈（有效/已取消/已完成）                    | Q-10；FR-06/07         |
-| user_id     | 操作人（登录用户） | BIGINT                | 否   | —                 | FOREIGN KEY → user(id)                           | FR-08；UC-04 P1        |
-| created_at  | 变更时间           | DATETIME              | 否   | CURRENT_TIMESTAMP | —                                                | UC-04 P1；G3           |
-| remark      | 备注（扩展位）     | VARCHAR(255)          | 是   | NULL              | —                                                | 预留                   |
+| 字段名      | 含义               | 类型与长度                     | 可空 | 默认值            | 约束                                             | 来源                   |
+| ----------- | ------------------ | ------------------------------ | ---- | ----------------- | ------------------------------------------------ | ---------------------- |
+| id          | 主键               | BIGINT UNSIGNED AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                      | 建模约定 4             |
+| order_id    | 所属订单           | BIGINT UNSIGNED                | 否   | —                 | FOREIGN KEY → orders(id)；INDEX                  | FR-06、FR-07；UC-03/04 |
+| from_status | 变更前状态         | VARCHAR(16)                    | 是①  | NULL              | CHECK ∈（有效/已取消/已完成）；CHECK ≠ to_status | Q-10；待确认项 2       |
+| to_status   | 变更后状态         | VARCHAR(16)                    | 否   | —                 | CHECK ∈（有效/已取消/已完成）                    | Q-10；FR-06/07         |
+| user_id     | 操作人（登录用户） | BIGINT UNSIGNED                | 否   | —                 | FOREIGN KEY → user(id)                           | FR-08；UC-04 P1        |
+| created_at  | 变更时间           | DATETIME                       | 否   | CURRENT_TIMESTAMP | —                                                | UC-04 P1；G3           |
+| remark      | 备注（扩展位）     | VARCHAR(255)                   | 是   | NULL              | —                                                | 预留                   |
 
 ① 首条"创建"流水无前状态，`from_status` 为 NULL（待组内确认项 2，见第 6 节）。
 
@@ -45,17 +45,17 @@
 
 **表用途**：为每束花的剩余量变化留痕。下单扣减（UC-03）、取消回补（UC-04）、商家调整（FR-02）各写一行；`after_qty >= 0` 与 `UNIQUE(order_id, change_type)` 分别落地 B-05 与 NFR-02/B-06。
 
-| 字段名         | 含义         | 类型与长度            | 可空 | 默认值            | 约束                                                         | 来源                               |
-| -------------- | ------------ | --------------------- | ---- | ----------------- | ------------------------------------------------------------ | ---------------------------------- |
-| id             | 主键         | BIGINT AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                                  | 建模约定 4                         |
-| bouquet_id     | 花束         | BIGINT                | 否   | —                 | FOREIGN KEY → bouquet(id)；INDEX                             | B-05；FR-01～04（庞延新域）        |
-| order_id       | 关联订单     | BIGINT                | 是   | NULL              | FOREIGN KEY → orders(id)；**UNIQUE (order_id, change_type)** | FR-05 扣减、FR-07 回补（何奕佳域） |
-| change_type    | 变更类型     | VARCHAR(16)           | 否   | —                 | CHECK ∈（下单扣减/取消回补/商家调整/初始化）                 | FR-05、FR-07、FR-02                |
-| quantity_delta | 变化量（束） | INT                   | 否   | —                 | 扣减为负、回补为正、调整可正可负                             | B-05；UC-03/04                     |
-| before_qty     | 变更前剩余量 | INT                   | 否   | —                 | —                                                            | G3；走查对照                       |
-| after_qty      | 变更后剩余量 | INT                   | 否   | —                 | **CHECK (after_qty >= 0)**                                   | **B-05**                           |
-| user_id        | 操作人       | BIGINT                | 是   | NULL              | FOREIGN KEY → user(id)                                       | FR-08、FR-02                       |
-| created_at     | 变更时间     | DATETIME              | 否   | CURRENT_TIMESTAMP | —                                                            | 建模约定 1；G3                     |
+| 字段名         | 含义         | 类型与长度                     | 可空 | 默认值            | 约束                                                         | 来源                               |
+| -------------- | ------------ | ------------------------------ | ---- | ----------------- | ------------------------------------------------------------ | ---------------------------------- |
+| id             | 主键         | BIGINT UNSIGNED AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                                  | 建模约定 4                         |
+| bouquet_id     | 花束         | BIGINT UNSIGNED                | 否   | —                 | FOREIGN KEY → bouquet(id)；INDEX                             | B-05；FR-01～04（庞延新域）        |
+| order_id       | 关联订单     | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → orders(id)；**UNIQUE (order_id, change_type)** | FR-05 扣减、FR-07 回补（何奕佳域） |
+| change_type    | 变更类型     | VARCHAR(16)                    | 否   | —                 | CHECK ∈（下单扣减/取消回补/商家调整/初始化）                 | FR-05、FR-07、FR-02                |
+| quantity_delta | 变化量（束） | INT                            | 否   | —                 | 扣减为负、回补为正、调整可正可负                             | B-05；UC-03/04                     |
+| before_qty     | 变更前剩余量 | INT                            | 否   | —                 | —                                                            | G3；走查对照                       |
+| after_qty      | 变更后剩余量 | INT                            | 否   | —                 | **CHECK (after_qty >= 0)**                                   | **B-05**                           |
+| user_id        | 操作人       | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → user(id)                                       | FR-08、FR-02                       |
+| created_at     | 变更时间     | DATETIME                       | 否   | CURRENT_TIMESTAMP | —                                                            | 建模约定 1；G3                     |
 
 **其他约束**：
 
@@ -77,7 +77,7 @@
 | ----------------------------------------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
 | `stock_change.bouquet_id`                             | bouquet(id) | 庞延新（花束与库存域） | `bouquet.stock_qty` 每次变化必须有对应流水；`stock_qty >= 0` 与本表 `after_qty >= 0` 双保险 |
 | `order_status_log.order_id` / `stock_change.order_id` | orders(id)  | 何奕佳（订单域）       | `orders.status` 每次变化写日志；`orders.idempotency_key` 唯一约束在 orders 表定义，本域不重复定义 |
-| `user_id`                                             | user(id)    | 庞华杰（用户与角色域） | user 主键类型（BIGINT 建议值，见第 6 节待确认项 1）          |
+| `user_id`                                             | user(id)    | 庞华杰（用户与角色域） | user 主键类型按 D-01 统一为 BIGINT UNSIGNED                  |
 
 ## 5 约束落点对照（供走查与 ER 图核对）
 
@@ -91,12 +91,12 @@
 
 ## 6 待组内确认项
 
-| #    | 问题                                                         | 当前建议                                                     | 影响            |
-| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------- |
-| 1    | 主键类型全组统一为 BIGINT 还是 INT（MySQL 外键要求两侧类型一致） | 建议流水表 BIGINT，各域主表同步                              | T4～T7 全部外键 |
-| 2    | `order_status_log.from_status` 首条流水取 NULL 还是占位状态值 | 建议 NULL——约定 3 状态枚举须与用例一致，不引入"新建"等枚举外值 | 字典可空性      |
-| 3    | 系统自动扣减时 `user_id` 填"系统"账号还是 NULL               | 约定系统账号，便于审计                                       | 字典可空性      |
-| 4    | 状态枚举是否预留"已完成"                                     | 按 Q-10 预留，本期不产生流转                                 | 两个 CHECK      |
+| #    | 问题                                                         | 当前建议                                                     | 影响         |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------ |
+| 1    | ~~主键类型全组统一为 BIGINT 还是 INT~~                       | **已由 D-01 确定：BIGINT UNSIGNED**（2026-11-17 统稿决定，何奕佳订单域 v0.3 已执行） | 全部外键类型 |
+| 2    | `order_status_log.from_status` 首条流水取 NULL 还是占位状态值 | 建议 NULL——约定 3 状态枚举须与用例一致，不引入"新建"等枚举外值 | 字典可空性   |
+| 3    | 系统自动扣减时 `user_id` 填"系统"账号还是 NULL               | 约定系统账号，便于审计                                       | 字典可空性   |
+| 4    | 状态枚举是否预留"已完成"                                     | 按 Q-10 预留，本期不产生流转                                 | 两个 CHECK   |
 
 ## 7 与实验一成果的对应
 
@@ -112,4 +112,4 @@
 | 版本 | 日期       | 内容                                                         | 修改人 |
 | ---- | ---------- | ------------------------------------------------------------ | ------ |
 | v0.1 | 2026-11-14 | 建立 order_status_log 与 stock_change 表结构及数据字典，含约束落点对照与示例数据；外键命名与状态枚举按组长建模约定修订 | 林伟翔 |
-
+| v0.2 | 2026-11-17 | 按 D-01 统一主外键类型为 BIGINT UNSIGNED，与订单域 v0.3 对齐 | 林伟翔 |
