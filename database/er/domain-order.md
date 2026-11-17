@@ -1,6 +1,6 @@
 # 订单域 —— 实体、属性与业务规则清单
 
-> 实验二 · 数据库设计 ｜ 主责人：何奕佳（订单域）｜ 版本 v0.2 · 2026-11-17
+> 实验二 · 数据库设计 ｜ 主责人：何奕佳（订单域）｜ 版本 v0.3 · 2026-11-17
 > 需求基线：FR-05（主）、FR-06、FR-08；B-05、B-06、B-08；NFR-01、NFR-02、NFR-03 ｜ 依据：`database/README.md` 分工与建模约定
 > 交叉确认：`orders.status` / `orders.idempotency_key`（林伟翔，流水域）、`order_item.bouquet_id`（庞延新，花束域）、`orders.user_id`（庞华杰，用户域）
 
@@ -35,26 +35,28 @@
 | total_amount | DECIMAL(10,2) | 否 | 订单金额合计（元），下单时确定，等于明细金额之和 | FR-05；B-08 |
 | delivery_date | DATE | 否 | 送达或自提日期 | FR-05；Q-03（窗口暂定） |
 | fulfillment_type | VARCHAR(8) | 否 | 履约方式，CHECK ∈（自提 / 配送） | FR-05 |
-| idempotency_key | VARCHAR(64) | 否 | 提交请求的幂等键，UNIQUE | NFR-02；UC-03 A5/AC-UC03-09 |
+| idempotency_key | VARCHAR(64) | 否 | 下单请求的幂等键，UNIQUE | NFR-02；UC-03 A5/AC-UC03-09 |
+| cancel_idempotency_key | VARCHAR(64) | 是 | 取消请求的幂等键，UNIQUE；未取消为 NULL | NFR-02；UC-04 A3/A5；接口核对 I-04 |
 | created_at | DATETIME | 否 | 下单时间，默认 CURRENT_TIMESTAMP | FR-05、FR-06 |
 | cancelled_at | DATETIME | 是 | 取消时间；NULL 表示未取消，取消时写入一次 | FR-07；B-06 |
 | updated_at | DATETIME | 否 | 最后更新时间，状态变更时刷新 | 建模约定 1 |
 
 ### 2.3 本实体约束
 
-1. **`UNIQUE (idempotency_key)`**：NFR-02 的落点。重复提交在插入阶段即被拒绝，返回首次结果，不进入扣减流程（对应 UC-03 第 3 步判重先于库存校验）。
-2. **`UNIQUE (order_no)`**：业务标识唯一，供顾客与客服按号查询。
-3. **`CHECK (status IN ('有效','已取消','已完成'))`**：取值必须与用例状态名一致；按 Q-10 本期只产生"有效 → 已取消"一次流转，"已完成"仅占位、不产生流转。
-4. **`CHECK (total_amount >= 0)`**：金额不为负；金额构成由明细数量与单价快照确定，不取花束当前价。
-5. **只改状态不删除**：B-06 要求历史订单保留，本表不提供 DELETE 路径；取消只写 `status='已取消'` 与 `cancelled_at`。
-6. **取消的条件更新**：应用层以 `UPDATE ... WHERE id=? AND status='有效'` 提交，影响行数为 0 即表示已被取消或不存在，不重复回补（与 UC-04 第 6 步、NFR-02 一致）。
+1. **`UNIQUE (idempotency_key)`**：**下单**请求的 NFR-02 落点。重复提交在插入阶段即被拒绝，返回首次结果，不进入扣减流程（对应 UC-03 第 3 步判重先于库存校验）。
+2. **`UNIQUE (cancel_idempotency_key)`**：**取消**请求的幂等落点，与下单分开（回应接口核对 I-04）；未取消为 NULL，取消时写入取消请求键，同一取消请求重试返回同一结果、不重复回补。
+3. **`UNIQUE (order_no)`**：业务标识唯一，供顾客与客服按号查询。
+4. **`CHECK (status IN ('有效','已取消','已完成'))`**：取值必须与用例状态名一致；按 Q-10 本期只产生"有效 → 已取消"一次流转，"已完成"仅占位、不产生流转。
+5. **`CHECK (total_amount >= 0)`**：金额不为负；金额构成由明细数量与单价快照确定，不取花束当前价。
+6. **只改状态不删除**：B-06 要求历史订单保留，本表不提供 DELETE 路径；取消只写 `status='已取消'` 与 `cancelled_at`。
+7. **取消的条件更新**：应用层以 `UPDATE ... WHERE id=? AND status='有效'` 提交，影响行数为 0 即表示已被取消或不存在，不重复回补（与 UC-04 第 6 步、NFR-02 一致）。
 
 ## 3 实体二：order_item（订单明细）
 
 ### 3.1 标识
 
 - 主键：`id`（BIGINT UNSIGNED，代理主键，AUTO_INCREMENT）。
-- 业务唯一性：`UNIQUE (order_id, bouquet_id)`——同一订单内同一花束只出现一行；当前业务为"一单一花束"，该约束同时防止同一订单重复写入明细。
+- 业务唯一性：`UNIQUE (order_id)`——本期一单一花束，"一单恰好一条明细"由单列唯一键**强制**（回应接口核对 I-03）；扩多花束时改为 `UNIQUE (order_id, bouquet_id)`。
 
 ### 3.2 属性清单
 
@@ -72,7 +74,7 @@
 
 1. **`unit_price` 是快照不是引用**：取值来自下单瞬间的花束单价，之后商家改价（UC-07 5A）不更新历史明细；这是 B-08 的唯一落点。
 2. **`CHECK (quantity BETWEEN 1 AND 99)`**：Q-02 的落点；是否超过剩余量不由此约束保证，而由下单时对 `bouquet.stock_qty` 的条件更新保证（跨表，见第 5 节）。
-3. **`amount = quantity × unit_price`**：两者写入后金额不再变化；不建生成列以免与快照语义混淆（如采用生成列，需在字典中注明计算口径）。
+3. **`amount = ROUND(quantity × unit_price, 2)`**：由行内 CHECK 校验，写入后金额不再变化；单价暂定上限 99,999.99 元/束，保证 `DECIMAL(10,2)` 不溢出（接口核对 I-10）。
 4. **外键 `ON DELETE RESTRICT`**：订单与花束均不物理删除，历史明细不得悬空。
 
 ## 4 联系与基数
@@ -83,14 +85,14 @@
 | orders — order_item | 1 : N | 明细侧必选 | 当前业务一单一花束（N=1），结构预留多花束；一单至少一条明细 |
 | bouquet — order_item | 1 : N | 明细侧必选 | 一种花束可出现在多条历史订单中；花束下架不影响历史订单（B-07 的延伸） |
 
-**基数要点（指导书检查重点）**：同一花束可以有多条历史订单，但**同一订单只对应一条有效占用**——"当前最多一个有效订单"由 `stock_change` 的唯一约束与库存数量共同保证，不由 `orders` 的自反约束表达。
+**基数要点（指导书检查重点）**：同一花束可以有多条历史订单，**也可以并存多笔有效订单**——只要各有效订单数量之和不超过该花束剩余量。因此"只成功一单"仅在剩余量不足时成立（如最后 1 束），不能写成"同一花束最多一个有效订单"；数量约束由 `bouquet.stock_qty` 条件更新与 `stock_change` 唯一约束共同保证。
 
 ## 5 本域业务规则汇总（供 ER 图与走查引用）
 
 | 规则 | 内容 | 数据落点 |
 |---|---|---|
 | B-08 | 下单时记录单价快照，改价不影响历史订单 | `order_item.unit_price` 写入后不再更新 |
-| NFR-02 | 重复提交只产生一次业务效果 | `orders.idempotency_key` UNIQUE；重复请求返回首单 |
+| NFR-02 | 重复提交只产生一次业务效果 | 下单：`idempotency_key` UNIQUE；取消：`cancel_idempotency_key` UNIQUE + 状态条件更新 |
 | Q-02 | 单笔数量 1—99 束 | `order_item.quantity` CHECK |
 | Q-10 | 本期仅"有效/已取消"两态 | `orders.status` CHECK 含占位值但不产生流转 |
 | B-06 | 取消只改状态、历史保留 | `orders.status` + `cancelled_at`；无 DELETE |
@@ -135,3 +137,4 @@
 |---|---|---|---|
 | v0.1 | 2026-11-16 | 建立订单域实体清单：orders / order_item 的标识、属性、约束、联系基数、跨域接口与待确认项 | 何奕佳 |
 | v0.2 | 2026-11-17 | 按统稿决定 D-01 把本域所有主键与外键类型改为 `BIGINT UNSIGNED`，与 `schema/user.md` 对齐 | 何奕佳 |
+| v0.3 | 2026-11-17 | 回应接口核对 I-04（分离取消幂等键）、I-08（澄清"同一花束可并存多笔有效订单"）、I-10（金额等式与单价上限） | 何奕佳 |
