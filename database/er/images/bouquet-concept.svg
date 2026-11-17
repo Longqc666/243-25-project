@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600"><rect width="100%" height="100%" fill="white"/>
+<rect x="88" y="67" width="10" height="72" rx="4" fill="#167b78" stroke="none" stroke-width="2"/>
+<text x="125.0" y="114.3" fill="#18323c" font-family="Microsoft YaHei" font-size="53" font-weight="700">花束与库存域 · 概念 ER 图</text>
+<text x="127.0" y="159.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">鲜花预订与交易平台  /  实验二数据库设计  /  庞延新</text>
+<text x="2133.0" y="99.2" fill="#167b78" font-family="Microsoft YaHei" font-size="25" font-weight="700">实体—联系视图</text>
+<text x="2120.0" y="141.5" fill="#647880" font-family="Microsoft YaHei" font-size="22" font-weight="400">v0.2  ·  2026.11.17</text>
+<polyline points="90,188 2310,188" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="106.0" y="240.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">矩形表示实体  ·  菱形表示联系  ·  数字表示基数与可选性</text>
+<text x="1960.0" y="240.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">浅绿：本域   /   灰色：跨域参照</text>
+<polyline points="510,360 655,360" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="825,360 900,360 900,535 1000,535" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="510,780 655,780" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="825,780 900,780 900,585 1000,585" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1400,535 1500,535 1500,360 1575,360" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1745,360 1890,360" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1400,585 1500,585 1500,780 1575,780" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1745,780 1890,780" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1200,630 1200,698" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1200,802 1200,880" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<rect x="160" y="300" width="350" height="120" rx="14" fill="#f6f8f9" stroke="#a9b9be" stroke-width="2"/>
+<text x="301.0" y="356.6" fill="#18323c" font-family="Microsoft YaHei" font-size="34" font-weight="700">商家</text>
+<text x="251.0" y="402.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：商家标识</text>
+<rect x="160" y="720" width="350" height="120" rx="14" fill="#eff8f6" stroke="#167b78" stroke-width="2"/>
+<text x="301.0" y="776.6" fill="#18323c" font-family="Microsoft YaHei" font-size="34" font-weight="700">分类</text>
+<text x="251.0" y="822.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：分类标识</text>
+<rect x="1000" y="490" width="400" height="140" rx="14" fill="#167b78" stroke="#167b78" stroke-width="3"/>
+<text x="1162.0" y="550.3" fill="white" font-family="Microsoft YaHei" font-size="38" font-weight="700">花束</text>
+<text x="1116.0" y="612.3" fill="#d6f2ee" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：花束标识</text>
+<rect x="1890" y="300" width="350" height="120" rx="14" fill="#eff8f6" stroke="#167b78" stroke-width="2"/>
+<text x="1997.0" y="356.6" fill="#18323c" font-family="Microsoft YaHei" font-size="34" font-weight="700">花束图片</text>
+<text x="1981.0" y="402.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：图片标识</text>
+<rect x="1890" y="720" width="350" height="120" rx="14" fill="#f6f8f9" stroke="#a9b9be" stroke-width="2"/>
+<text x="1997.0" y="776.6" fill="#18323c" font-family="Microsoft YaHei" font-size="34" font-weight="700">订单明细</text>
+<text x="1981.0" y="822.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：明细标识</text>
+<rect x="1000" y="880" width="400" height="120" rx="14" fill="#f6f8f9" stroke="#a9b9be" stroke-width="2"/>
+<text x="1132.0" y="936.6" fill="#18323c" font-family="Microsoft YaHei" font-size="34" font-weight="700">库存变更</text>
+<text x="1116.0" y="982.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">标识：流水标识</text>
+<polygon points="655,360 740,308 825,360 740,412" fill="white" stroke="#167b78" stroke-width="3"/>
+<text x="711.0" y="370.0" fill="#167b78" font-family="Microsoft YaHei" font-size="29" font-weight="700">发布</text>
+<polygon points="655,780 740,728 825,780 740,832" fill="white" stroke="#167b78" stroke-width="3"/>
+<text x="711.0" y="790.0" fill="#167b78" font-family="Microsoft YaHei" font-size="29" font-weight="700">归类</text>
+<polygon points="1575,360 1660,308 1745,360 1660,412" fill="white" stroke="#167b78" stroke-width="3"/>
+<text x="1631.0" y="370.0" fill="#167b78" font-family="Microsoft YaHei" font-size="29" font-weight="700">拥有</text>
+<polygon points="1575,780 1660,728 1745,780 1660,832" fill="white" stroke="#167b78" stroke-width="3"/>
+<text x="1616.5" y="790.0" fill="#167b78" font-family="Microsoft YaHei" font-size="29" font-weight="700">被引用</text>
+<polygon points="1115,750 1200,698 1285,750 1200,802" fill="white" stroke="#167b78" stroke-width="3"/>
+<text x="1156.5" y="760.0" fill="#167b78" font-family="Microsoft YaHei" font-size="29" font-weight="700">有历史</text>
+<rect x="543.5" y="320" width="45.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="558.5" y="347.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1</text>
+<rect x="911.5" y="494" width="77.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="926.5" y="521.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">0..N</text>
+<rect x="543.5" y="740" width="45.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="558.5" y="767.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1</text>
+<rect x="911.5" y="596" width="77.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="926.5" y="623.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">0..N</text>
+<rect x="1423.5" y="493" width="45.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1438.5" y="520.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1</text>
+<rect x="1779.5" y="320" width="77.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1794.5" y="347.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1..N</text>
+<rect x="1423.5" y="599" width="45.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1438.5" y="626.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1</text>
+<rect x="1779.5" y="740" width="77.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1794.5" y="767.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">0..N</text>
+<rect x="1219.5" y="648" width="45.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1234.5" y="675.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1</text>
+<rect x="1219.5" y="829" width="77.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1234.5" y="856.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">0..N</text>
+<text x="1051.5" y="366.1" fill="#167b78" font-family="Microsoft YaHei" font-size="27" font-weight="700">一条发布，对应一种花束</text>
+<text x="1004.5" y="407.4" fill="#647880" font-family="Microsoft YaHei" font-size="23" font-weight="400">库存按束计量；当前价与成交快照分开</text>
+<rect x="100" y="1075" width="500" height="355" rx="18" fill="#f7faf9" stroke="#d5e2e3" stroke-width="2"/>
+<text x="127.0" y="1121.3" fill="#167b78" font-family="Microsoft YaHei" font-size="24" font-weight="700">01</text>
+<text x="177.0" y="1124.9" fill="#18323c" font-family="Microsoft YaHei" font-size="30" font-weight="700">分类属性</text>
+<polyline points="127,1151 573,1151" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="128.0" y="1198.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">分类标识</text>
+<text x="128.0" y="1241.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">分类名称（唯一）</text>
+<text x="128.0" y="1284.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">展示次序</text>
+<rect x="640" y="1075" width="1120" height="355" rx="18" fill="#f7faf9" stroke="#d5e2e3" stroke-width="2"/>
+<text x="667.0" y="1121.3" fill="#167b78" font-family="Microsoft YaHei" font-size="24" font-weight="700">02</text>
+<text x="717.0" y="1124.9" fill="#18323c" font-family="Microsoft YaHei" font-size="30" font-weight="700">花束属性</text>
+<polyline points="667,1151 1733,1151" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="668.0" y="1198.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">花名</text>
+<text x="668.0" y="1241.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">当前单价（元/束）</text>
+<text x="668.0" y="1284.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">当前剩余可预订量（束）</text>
+<text x="668.0" y="1327.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">花语与适用场景</text>
+<text x="668.0" y="1370.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">上下架状态</text>
+<text x="1200.0" y="1198.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">描述（选填）</text>
+<text x="1200.0" y="1241.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">颜色（选填）</text>
+<text x="1200.0" y="1284.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">节日档期（选填）</text>
+<text x="1200.0" y="1327.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">创建时间</text>
+<text x="1200.0" y="1370.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">更新时间</text>
+<rect x="1800" y="1075" width="500" height="355" rx="18" fill="#f7faf9" stroke="#d5e2e3" stroke-width="2"/>
+<text x="1827.0" y="1121.3" fill="#167b78" font-family="Microsoft YaHei" font-size="24" font-weight="700">03</text>
+<text x="1877.0" y="1124.9" fill="#18323c" font-family="Microsoft YaHei" font-size="30" font-weight="700">图片属性</text>
+<polyline points="1827,1151 2273,1151" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="1828.0" y="1198.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">图片标识</text>
+<text x="1828.0" y="1241.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">图片存储引用</text>
+<text x="1828.0" y="1284.2" fill="#18323c" font-family="Microsoft YaHei" font-size="25" font-weight="400">显示顺序</text>
+<text x="104.0" y="1493.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">业务下限：成功发布至少 1 张图片；库存初始化流水的下限由发布事务维护，仍待共同确认。</text>
+<text x="104.0" y="1538.4" fill="#647880" font-family="Microsoft YaHei" font-size="23" font-weight="400">本图为花束域子图；跨域实体仅展示标识，完整属性见各域数据字典。</text>
+</svg>

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600"><rect width="100%" height="100%" fill="white"/>
+<rect x="88" y="67" width="10" height="72" rx="4" fill="#167b78" stroke="none" stroke-width="2"/>
+<text x="125.0" y="114.3" fill="#18323c" font-family="Microsoft YaHei" font-size="53" font-weight="700">花束与库存域 · 表间关系图</text>
+<text x="127.0" y="159.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">鲜花预订与交易平台  /  实验二数据库设计  /  庞延新</text>
+<text x="2110.0" y="99.2" fill="#167b78" font-family="Microsoft YaHei" font-size="25" font-weight="700">表结构与外键视图</text>
+<text x="2120.0" y="141.5" fill="#647880" font-family="Microsoft YaHei" font-size="22" font-weight="400">v0.2  ·  2026.11.17</text>
+<polyline points="90,188 2310,188" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="105.0" y="240.3" fill="#647880" font-family="Microsoft YaHei" font-size="24" font-weight="400">PK 主键   ·   FK 外键   ·   UK 唯一键   ·   U = UNSIGNED</text>
+<text x="1811.0" y="239.4" fill="#647880" font-family="Microsoft YaHei" font-size="23" font-weight="400">业务主外键按 D-01 统一为 BIGINT UNSIGNED</text>
+<polyline points="600,399 710,399 710,445 920,445" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="600,939 760,939 760,491 920,491" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1570,399 1650,399 1650,445 1820,445" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1650,399 1650,901 1820,901" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="1650,901 1650,1205 1820,1205" fill="none" stroke="#718b91" stroke-width="3" stroke-linejoin="round"/>
+<rect x="100" y="280" width="500" height="210" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="100" y="280" width="500" height="96" rx="17" fill="#344f5a" stroke="none" stroke-width="2"/>
+<rect x="100" y="358" width="500" height="18" fill="#344f5a"/>
+<text x="124.0" y="330.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">user</text>
+<text x="125.0" y="367.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">商家角色 · 跨域参照</text>
+<rect x="102" y="376" width="496" height="46" fill="#f4f8f8"/>
+<text x="119.0" y="406.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="170.0" y="411.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="170.0" y="457.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">应用校验商家角色及归属</text>
+<rect x="100" y="820" width="500" height="256" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="100" y="820" width="500" height="96" rx="17" fill="#167b78" stroke="none" stroke-width="2"/>
+<rect x="100" y="898" width="500" height="18" fill="#167b78"/>
+<text x="124.0" y="870.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">category</text>
+<text x="125.0" y="907.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">分类 · 本域</text>
+<rect x="102" y="916" width="496" height="46" fill="#f4f8f8"/>
+<text x="119.0" y="946.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="170.0" y="951.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="119.0" y="992.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">UK</text>
+<text x="170.0" y="997.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">name : VARCHAR(50)</text>
+<rect x="102" y="1008" width="496" height="46" fill="#f4f8f8"/>
+<text x="170.0" y="1043.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">sort_no : INT</text>
+<rect x="920" y="280" width="650" height="829" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="920" y="280" width="650" height="96" rx="17" fill="#167b78" stroke="none" stroke-width="2"/>
+<rect x="920" y="358" width="650" height="18" fill="#167b78"/>
+<text x="944.0" y="330.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">bouquet</text>
+<text x="945.0" y="367.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">花束 · 本域</text>
+<rect x="922" y="376" width="646" height="46" fill="#f4f8f8"/>
+<text x="939.0" y="406.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="990.0" y="411.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="939.0" y="452.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="990.0" y="457.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">seller_id : BIGINT U</text>
+<rect x="922" y="468" width="646" height="46" fill="#f4f8f8"/>
+<text x="939.0" y="498.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="990.0" y="503.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">category_id : BIGINT U</text>
+<text x="990.0" y="549.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">name : VARCHAR(100)</text>
+<rect x="922" y="560" width="646" height="46" fill="#f4f8f8"/>
+<text x="990.0" y="595.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">price : DECIMAL(10,2)</text>
+<text x="990.0" y="641.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">stock_qty : INT</text>
+<rect x="922" y="652" width="646" height="46" fill="#f4f8f8"/>
+<text x="990.0" y="687.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">meaning_scene : VARCHAR(500)</text>
+<text x="990.0" y="733.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">description : TEXT</text>
+<rect x="922" y="744" width="646" height="46" fill="#f4f8f8"/>
+<text x="990.0" y="779.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">color : VARCHAR(32)</text>
+<text x="990.0" y="825.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">festival_slot : VARCHAR(64)</text>
+<rect x="922" y="836" width="646" height="46" fill="#f4f8f8"/>
+<text x="990.0" y="871.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">status : VARCHAR(16)</text>
+<text x="990.0" y="917.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">version : BIGINT</text>
+<rect x="922" y="928" width="646" height="46" fill="#f4f8f8"/>
+<text x="990.0" y="963.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">created_at : DATETIME</text>
+<text x="990.0" y="1009.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">updated_at : DATETIME</text>
+<polyline points="943,1035 1547,1035" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="943.0" y="1073.5" fill="#647880" font-family="Microsoft YaHei" font-size="22" font-weight="400">stock_qty ≥ 0  ·  price &gt; 0  ·  历史引用保留</text>
+<rect x="1820" y="280" width="480" height="348" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="1820" y="280" width="480" height="96" rx="17" fill="#167b78" stroke="none" stroke-width="2"/>
+<rect x="1820" y="358" width="480" height="18" fill="#167b78"/>
+<text x="1844.0" y="330.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">bouquet_image</text>
+<text x="1845.0" y="367.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">花束图片 · 本域</text>
+<rect x="1822" y="376" width="476" height="46" fill="#f4f8f8"/>
+<text x="1839.0" y="406.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="1890.0" y="411.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="1839.0" y="452.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="1890.0" y="457.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">bouquet_id : BIGINT U</text>
+<rect x="1822" y="468" width="476" height="46" fill="#f4f8f8"/>
+<text x="1890.0" y="503.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">image_url : VARCHAR(512)</text>
+<text x="1890.0" y="549.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">sort_no : INT</text>
+<rect x="1822" y="560" width="476" height="46" fill="#f4f8f8"/>
+<text x="1890.0" y="595.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">created_at : DATETIME</text>
+<rect x="1820" y="690" width="480" height="302" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="1820" y="690" width="480" height="96" rx="17" fill="#344f5a" stroke="none" stroke-width="2"/>
+<rect x="1820" y="768" width="480" height="18" fill="#344f5a"/>
+<text x="1844.0" y="740.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">order_item</text>
+<text x="1845.0" y="777.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">订单明细 · 跨域字段摘录</text>
+<rect x="1822" y="786" width="476" height="46" fill="#f4f8f8"/>
+<text x="1839.0" y="816.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="1890.0" y="821.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="1839.0" y="862.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="1890.0" y="867.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">order_id : BIGINT U</text>
+<rect x="1822" y="878" width="476" height="46" fill="#f4f8f8"/>
+<text x="1839.0" y="908.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="1890.0" y="913.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">bouquet_id : BIGINT U</text>
+<text x="1890.0" y="959.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">unit_price : DECIMAL(10,2)</text>
+<rect x="1820" y="1040" width="480" height="348" rx="17" fill="white" stroke="#d5e2e3" stroke-width="2"/>
+<rect x="1820" y="1040" width="480" height="96" rx="17" fill="#344f5a" stroke="none" stroke-width="2"/>
+<rect x="1820" y="1118" width="480" height="18" fill="#344f5a"/>
+<text x="1844.0" y="1090.7" fill="white" font-family="Microsoft YaHei" font-size="33" font-weight="700">stock_change</text>
+<text x="1845.0" y="1127.5" fill="#deedee" font-family="Microsoft YaHei" font-size="22" font-weight="400">库存流水 · 跨域字段摘录</text>
+<rect x="1822" y="1136" width="476" height="46" fill="#f4f8f8"/>
+<text x="1839.0" y="1166.5" fill="#167b78" font-family="Microsoft YaHei" font-size="21" font-weight="700">PK</text>
+<text x="1890.0" y="1171.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">id : BIGINT U</text>
+<text x="1839.0" y="1212.5" fill="#647b8b" font-family="Microsoft YaHei" font-size="21" font-weight="700">FK</text>
+<text x="1890.0" y="1217.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">bouquet_id : BIGINT U</text>
+<rect x="1822" y="1228" width="476" height="46" fill="#f4f8f8"/>
+<text x="1890.0" y="1263.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">before_qty : INT</text>
+<text x="1890.0" y="1309.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">quantity_delta : INT</text>
+<rect x="1822" y="1320" width="476" height="46" fill="#f4f8f8"/>
+<text x="1890.0" y="1355.1" fill="#18323c" font-family="Microsoft YaHei" font-size="27" font-weight="400">after_qty : INT</text>
+<rect x="739.5" y="403" width="131.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="754.5" y="430.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1 → 0..N</text>
+<rect x="774.5" y="501" width="131.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="789.5" y="528.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1 → 0..N</text>
+<rect x="1664.5" y="401" width="131.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1679.5" y="428.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1 → 0..N</text>
+<rect x="1664.5" y="856" width="131.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1679.5" y="883.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1 → 0..N</text>
+<rect x="1664.5" y="1161" width="131.0" height="39" rx="8" fill="white" stroke="none" stroke-width="2"/>
+<text x="1679.5" y="1188.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">1 → 0..N</text>
+<rect x="100" y="1240" width="500" height="116" rx="15" fill="#eff8f6" stroke="none" stroke-width="2"/>
+<text x="122.0" y="1286.0" fill="#167b78" font-family="Microsoft YaHei" font-size="28" font-weight="700">当前价  ≠  成交快照</text>
+<text x="122.0" y="1329.4" fill="#647880" font-family="Microsoft YaHei" font-size="23" font-weight="400">price / order_item.unit_price</text>
+<polyline points="100,1415 2300,1415" fill="none" stroke="#d5e2e3" stroke-width="2" stroke-linejoin="round"/>
+<text x="106.0" y="1467.3" fill="#167b78" font-family="Microsoft YaHei" font-size="24" font-weight="700">引用下限</text>
+<text x="270.0" y="1468.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">外键图表示 0..N 张图片；成功发布至少 1 张，由应用完整性维护。</text>
+<text x="106.0" y="1522.3" fill="#167b78" font-family="Microsoft YaHei" font-size="24" font-weight="700">整合说明</text>
+<text x="270.0" y="1523.2" fill="#647880" font-family="Microsoft YaHei" font-size="25" font-weight="400">流水现稿需按 D-01 同步类型；本图为子图，完整关系由全组 relations.md 汇总。</text>
+</svg>
