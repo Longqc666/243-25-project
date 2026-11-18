@@ -1,6 +1,7 @@
 # 用户与角色域 —— 表结构与数据字典
 
-> 实验二 · 数据库设计 ｜ 主责人：庞华杰 ｜ 交叉检查：庞延新 ｜ 版本 v0.1 · 2026-11-17
+> 实验二 · 数据库设计 ｜ 主责人：庞华杰 ｜ 交叉检查：庞延新、何奕佳 ｜ 版本 v0.2 · 2026-11-18
+> 本版按何奕佳《用户与角色域 交叉检查意见》（review/user-domain-by-order-2026-11-17.md）U-01～U-06 修订
 > 依据：[database/README.md](../README.md) 分工与建模约定、[概念 ER 图](../er/er-overall.md)
 > 基线：FR-08（主）、FR-01、FR-02、FR-05、FR-06；B-02、B-03；NFR-03
 
@@ -46,7 +47,7 @@
 | password_hash | 密码哈希 | VARCHAR(255) | 否 | — | 只存 bcrypt 哈希（60 字符），不存明文 | **NFR-03** |
 | display_name | 姓名或昵称 | VARCHAR(50) | 否 | — | — | FR-01、FR-06 |
 | phone | 手机号 | VARCHAR(20) | 否 | — | **UNIQUE**；CHECK（11 位数字） | NFR-03（响应中不得出现他人手机号） |
-| email | 邮箱 | VARCHAR(100) | 是 | NULL | — | 扩展位，本期不用于登录 |
+| email | 邮箱 | VARCHAR(100) | 是 | NULL | — | 预留字段，本期不参与登录、不加唯一约束 |
 | avatar_url | 头像地址 | VARCHAR(255) | 是 | NULL | — | FR-01 商家信息展示 |
 | role_id | 角色 | TINYINT UNSIGNED | 否 | — | FOREIGN KEY → `role(id)`；INDEX | **B-03** |
 | status | 账号状态 | VARCHAR(8) | 否 | '正常' | **CHECK ∈（正常/停用）** | 管理员停用（1.5 纳入范围） |
@@ -89,7 +90,7 @@
 - 用 `user_id` 同时作主键与外键实现 1:0..1：一个商家最多一行档案，档案不能脱离账号存在。
 - **“只有商家才有档案”不是外键能表达的约束**：`seller_profile.user_id` 只保证该用户存在。插入前必须由应用层校验 `user.role_id = 2`（或使用触发器）；放任直接写库会产生“顾客拥有店铺”的不一致，走查 W-06 专门说明这一点。
 - `shop_name` 唯一：同一店铺名不允许两个商家重复注册，便于顾客按店铺识别。
-- 商家停用后档案保留，不做级联删除。
+- 商家停用后档案保留，不做级联删除。`user.status` 改为“停用”时，同一事务把该商家名下 `status='已上架'` 的花束置为“已下架”，检索与下单自然不可见；历史订单、明细与流水不受影响，仍可查看与取消（D-06）。
 
 ## 5 索引与外键清单
 
@@ -122,7 +123,7 @@
 1. 三张表主键都是单属性（`user_id` 也是单列主键），不存在部分依赖，满足 2NF。
 2. `user` 中不保存角色名称。若把 `role.name` 放进 `user`，则 `id → role_id → role_name` 构成传递依赖；拆出 `role` 字典后，角色名只依赖 `role.id`，`user` 满足 3NF。
 3. `seller_profile` 是 1:1 拆分，不是把多值属性塞进 `user`：店铺资料对顾客/管理员为 NULL，独立成表避免空值膨胀，也让 `shop_name` 的唯一约束只作用于商家。拆分后无部分依赖与传递依赖，满足 3NF。
-4. 头像只存 URL，不存二进制，不构成多值属性；一个账号一行头像。
+4. 1NF 补充：头像只存 URL、不存二进制，一个账号一行头像，不构成多值属性。
 
 **有意保留的冗余（本域之外，供统稿引用）**
 
@@ -142,7 +143,7 @@
 | NFR-03 不泄露他人信息 | `phone`、`display_name` 属敏感列 | 查询按登录态过滤，应用层责任 |
 | 账号可停用 | `user.status` CHECK ∈（正常/停用） | 停用后拒绝登录由应用层校验 |
 | 商家唯一档案 | `seller_profile.user_id` 主键 | 一商家一档案 |
-| 只有商家有档案 | 无声明式约束（CHECK 不能跨表） | **应用层或触发器校验 `role_id=2`** |
+| 只有商家有档案 | 无声明式约束（CHECK 不能跨表） | **应用层或触发器校验 `role_id=2`**；验收情境 W-06：给定 `role_id=1` 的账号，插入 `seller_profile` 应被拒绝且不产生档案行 |
 | 商家只能操作本人花束 | 通过 `bouquet.seller_id = 当前 user.id` 判断 | 花束域落点，应用层责任 |
 
 ## 8 跨域接口
@@ -190,7 +191,8 @@ CREATE TABLE `user` (
   CONSTRAINT fk_user_role FOREIGN KEY (role_id) REFERENCES `role`(id)
     ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT ck_user_status CHECK (status IN ('正常','停用')),
-  CONSTRAINT ck_user_username_len CHECK (CHAR_LENGTH(username) BETWEEN 3 AND 30)
+  CONSTRAINT ck_user_username CHECK (username REGEXP '^[A-Za-z0-9_]{3,30}$'),
+  CONSTRAINT ck_user_phone CHECK (phone REGEXP '^[0-9]{11}$')
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE seller_profile (
@@ -203,6 +205,7 @@ CREATE TABLE seller_profile (
   updated_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id),
   UNIQUE KEY uk_seller_shop (shop_name),
+  CONSTRAINT ck_profile_phone CHECK (contact_phone REGEXP '^[0-9]{11}$'),
   CONSTRAINT fk_profile_user FOREIGN KEY (user_id) REFERENCES `user`(id)
     ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -215,7 +218,7 @@ CREATE TABLE seller_profile (
 | 1 | 是否需要记录商家资质与审核状态 | 本期不做（FR 未要求） | 若增加，需扩展 seller_profile |
 | 2 | 手机号是否允许非 11 位（如座机） | 统一 11 位手机号，座机放 `pickup_address` 说明 | CHECK 与表单校验 |
 | 3 | 顾客是否需要收货地址表 | 本期不建：FR-05 只有自提/配送方式，地址在配送场景未定义 | 若补地址，需新增表并改 UC-03 |
-| 4 | 商家停用后其花束是否仍可检索 | 待花束域与检索规则共同约定 | 走查 W-05 的结论 |
+| 4 | 商家停用后其花束是否仍可检索 | **已定（D-06）**：停用时同事务联动下架其在架花束；检索条件仍只看 `bouquet.status`，无需联表 user | 走查 W-05、花束域 `bouquet.status` |
 | 5 | 是否允许修改角色 | 本期不允许（B-03 与预置账号） | 角色变更需重走发布/下单归属校验 |
 
 ---
@@ -225,3 +228,4 @@ CREATE TABLE seller_profile (
 | 版本 | 日期 | 内容 | 修改人 |
 |---|---|---|---|
 | v0.1 | 2026-11-17 | 建立 role、user、seller_profile 表结构与数据字典：字段六要素、索引外键、约束落点、跨域接口、规范化说明与参考 DDL | 庞华杰 |
+| v0.2 | 2026-11-18 | 按交叉检查 U-01～U-06 修订：DDL 补 username/phone/contact_phone 的 REGEXP CHECK，email 定位为预留字段，补 W-06 验收，1NF 说明合并，D-06 明确商家停用联动下架 | 庞华杰 |
