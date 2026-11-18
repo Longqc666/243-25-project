@@ -1,6 +1,7 @@
 ﻿# 概念 ER 图（总体）
 
-> 实验二 · 数据库设计 ｜ 主责人：庞华杰（总体框架与合并）｜ 版本 v0.1 · 2026-11-17
+> 实验二 · 数据库设计 ｜ 主责人：庞华杰（总体框架与合并）｜ 版本 v0.2 · 2026-11-18
+> v0.2 合并花束域（T4）并同步订单域 v0.3 的 1:1 明细约束；花束域不再是待定稿
 > 依据：[database/README.md](../README.md) 分工与建模约定、[需求简表](../../requirements/requirements.md)、[用例对应](../../requirements/use-cases.md)
 > 各域明细：用户与角色 [schema/user.md](../schema/user.md)、订单 [schema/order.md](../schema/order.md)、状态与库存流水 [schema/order-status.md](../schema/order-status.md)；花束域待 T4 定稿
 
@@ -70,16 +71,16 @@
 | 用户与角色 | [schema/user.md](../schema/user.md) | role、user、seller_profile | 无 |
 | 订单 | [schema/order.md](../schema/order.md) | orders、order_item | 待确认是否增加 `bouquet_name_snapshot`，会影响 order_item 字段 |
 | 状态与库存流水 | [schema/order-status.md](../schema/order-status.md) | order_status_log、stock_change | 主键类型已由 README 决定统一为 BIGINT，对方待确认项 1 可关闭 |
-| 花束与库存 | 待 T4 提交 | category、bouquet、bouquet_image | 字段与状态枚举待定稿；本图仅画标识与关键属性 |
+| 花束与库存 | [schema/bouquet.md](../schema/bouquet.md) | category、bouquet、bouquet_image | v0.1 已提交，本图已按字典合并：ouquet 增加 ersion，状态枚举与字典一致 |
 
 ## 7 待确认项
 
 | # | 问题 | 当前处理 | 影响 |
 |---|---|---|---|
-| 1 | 花束域字段（颜色、节日档期、图片数量上限） | 图中不展开，等 T4 定稿 | ER 与关系图需二次合并 |
+| 1 | 花束域字段（颜色、节日档期、图片数量上限） | 已合并 T4 v0.1；颜色/档期按字典为可空字段，不单设字典表 | 若后续改为字典表，需同步 R4 与关系图 |
 | 2 | 是否保存花束名称快照 | 建议追加 `order_item.bouquet_name_snapshot` | 历史订单展示 |
 | 3 | 状态是否保留“已完成” | 按 Q-10 预留不流转，登记教师确认 | 两处 CHECK |
-| 4 | 商家停用后其花束是否仍可被检索 | 待花束域与检索规则共同约定 | W-05 走查结论 |
+| 4 | 商家停用后其花束是否仍可被检索 | **已定（D-06）**：停用账号时同事务联动下架其在架花束；检索仍只看 ouquet.status | W-05 走查、花束域状态说明 |
 | 5 | 分类是否允许多级 | 当前按单级设计（FR-01 只要求分类） | category 是否加 parent_id |
 
 ---
@@ -89,3 +90,4 @@
 | 版本 | 日期 | 内容 | 修改人 |
 |---|---|---|---|
 | v0.1 | 2026-11-17 | 建立总体 ER 框架：10 实体、13 联系、基数与可选性、建模说明与一致性核对 | 庞华杰 |
+| v0.2 | 2026-11-18 | 合并花束域 v0.1；R7 改为 1:1；同步订单域 v0.3 的取消幂等键；D-06 落定停用联动下架 | 庞华杰 |
