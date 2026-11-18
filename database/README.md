@@ -1,7 +1,7 @@
 ﻿﻿# 数据库设计材料（实验二）
 
 鲜花预订与交易平台 · 第 25 组 · 组长：庞华杰
-版本：v0.1（2026-11-10）　依据：实验二数据库设计实验指导书 v1.6（2026-11-09）
+版本：v0.3（2026-11-18）　依据：实验二数据库设计实验指导书 v1.6（2026-11-09）
 
 本目录保存实验二的**小组共享成果**：概念 ER 图、数据库表与数据字典、表间关系图、设计说明与走查、互评修订记录。
 需求基线为 [需求简表](../requirements/requirements.md)（FR-01～FR-08）、[用例对应与个人负责部分](../requirements/use-cases.md)（UC-01～UC-08）及 [2026-11-07 规则落实记录](../records/rules-uc02-uc06-2026-11-07.md)。
@@ -17,7 +17,7 @@
 | 成员 | 主责数据域 | 主要表（建议，可随设计调整） | 对应需求与用例 |
 |---|---|---|---|
 | 庞华杰（组长） | 总体 ER 图框架与整合；用户与角色域 | `user`、`role`、`seller_profile` | FR-08、UC-05；统筹全部交付物 |
-| 庞延新 | 花束与库存域 | `bouquet`、`category`、`bouquet_image`、`bouquet_stock` | FR-01～FR-04、UC-01/02/06/07 |
+| 庞延新 | 花束与库存域 | `bouquet`、`category`、`bouquet_image`（剩余量在 `bouquet.stock_qty`，变更走 `stock_change`） | FR-01～FR-04、UC-01/02/06/07 |
 | 何奕佳 | 订单域 | `orders`、`order_item` | FR-05、FR-06、UC-03/08 |
 | 林伟翔 | 订单状态与库存流水域 | `order_status_log`、`stock_change` | FR-07、UC-04/05；互评组织 |
 
@@ -139,47 +139,57 @@ database/
 |---|---|---|---|
 | v0.1 | 2026-11-10 | 建立实验二分工人表、任务清单、约束与互评安排 | 庞华杰 |
 | v0.2 | 2026-11-17 | 增加当前进度、统稿决定（主键/用户建模/状态/流水操作人）与剩余待办 | 庞华杰 |
+| v0.3 | 2026-11-18 | 四域与关系图、规范化、走查全部就位；新增 D-06；更新成果状态、Issue 结论与剩余事项 | 庞华杰 |
 
-## 九、当前进度与统稿决定（v0.2 · 2026-11-17）
+## 九、当前进度与统稿决定（v0.3 · 2026-11-18）
 
-### 9.1 已完成文件
+### 9.1 成果状态
 
 | 内容 | 文件 | 主责 | 状态 |
 |---|---|---|---|
-| 总体概念 ER 图 | [er/er-overall.md](er/er-overall.md)、`er/er-overall.png` | 庞华杰 | v0.1 |
-| 用户与角色域 | [schema/user.md](schema/user.md)、`schema/user-relations.png` | 庞华杰 | v0.1 |
-| 订单域 | [er/domain-order.md](er/domain-order.md)、[schema/order.md](schema/order.md) | 何奕佳 | v0.1 |
-| 状态与库存流水域 | [er/domain-order-status.md](er/domain-order-status.md)、[schema/order-status.md](schema/order-status.md) | 林伟翔 | v0.1 |
-| 场景走查 | [walkthrough.md](walkthrough.md) | 何奕佳（S1/S2） | v0.1，S3/S4 待补 |
-| 花束与库存域 | 待提交 | 庞延新 | 未开始（T4/T9） |
-| 完整表间关系图 | 待 T4 定稿后汇总 | 林伟翔 | 未开始（T8） |
+| 总体概念 ER 图 | [er/er-overall.md](er/er-overall.md)、`er/er-overall.png` | 庞华杰 | v0.2，已合并花束域、R7 改 1:1 |
+| 用户与角色域 | [schema/user.md](schema/user.md)、`schema/user-relations.png` | 庞华杰 | v0.2，按 U-01～U-06 修订 |
+| 花束与库存域 | [er/domain-bouquet.md](er/domain-bouquet.md)、[schema/bouquet.md](schema/bouquet.md)、`er/images/` | 庞延新 | v0.1 |
+| 订单域 | [er/domain-order.md](er/domain-order.md)、[schema/order.md](schema/order.md) | 何奕佳 | v0.3（一单一条明细、取消幂等键） |
+| 状态与库存流水域 | [er/domain-order-status.md](er/domain-order-status.md)、[schema/order-status.md](schema/order-status.md) | 林伟翔 | v0.2（BIGINT UNSIGNED） |
+| 表间关系图（全部 10 张表） | [schema/relations.md](schema/relations.md)、`schema/relations.png`、`schema/draw_relations.py` | 林伟翔 | v0.1 |
+| 规范化说明 | [design-notes.md](design-notes.md) | 庞延新 | v0.2 |
+| 场景走查 S1—S7 | [walkthrough.md](walkthrough.md) | 何奕佳、庞延新（S3 草稿） | v0.2 |
+| 交叉互评 | [review/user-domain-by-order](review/user-domain-by-order-2026-11-17.md)、[review/order-domain-by-user](review/order-domain-by-user-2026-11-17.md)、[review/bouquet-order-stock-interface](review/bouquet-order-stock-interface-2026-11-17.md) | 何奕佳、庞华杰、庞延新 | v0.1 |
+| 个人报告 | 各人本地 `学号_姓名_实验二.docx` | 全员 | 庞华杰已完稿，其余待交 |
 
 ### 9.2 统稿决定
 
-以下决定用于消除各域待确认项中的重复问题，后续以本节为准，各域文件下一版可直接引用编号。
-
 | 编号 | 决定 | 影响的待确认项 |
 |---|---|---|
-| D-01 | 业务表主键统一 `BIGINT UNSIGNED`，字典表 `role` 用 `TINYINT UNSIGNED`；外键两侧类型一致 | 流水域待确认 1 |
-| D-02 | 用户只建 `user` 一张表加 `role` 字典，不采用 `customer`/`employee`/`admin` 三表方案 | —（理由见 er/er-overall.md 第 5 节） |
-| D-03 | 状态枚举统一为 有效 / 已取消 / 已完成，`已完成` 仅占位、本期不流转 | 订单域待确认 5、流水域待确认 4 |
-| D-04 | `stock_change.user_id` 允许 NULL（系统自动写入），不新建“系统账号”行；`order_status_log.user_id` 仍必填 | 流水域待确认 3 |
-| D-05 | 保留 `order_item.unit_price`、`orders.total_amount` 快照，并保留 `bouquet.stock_qty` 与 `stock_change` 的当前值/流水并存 | 订单域待确认 4 |
+| D-01 | 业务表主键统一 `BIGINT UNSIGNED`，字典表 `role` 用 `TINYINT UNSIGNED`；外键两侧类型一致 | 流水域待确认 1（已关闭） |
+| D-02 | 用户只建 `user` 一张表加 `role` 字典，不采用三表方案 | —（理由见 er/er-overall.md 第 5 节） |
+| D-03 | 状态枚举统一为 有效 / 已取消 / 已完成，`已完成` 仅占位、本期不流转 | 订单域、流水域待确认项（已关闭） |
+| D-04 | `stock_change.user_id` 允许 NULL（系统自动写入）；`order_status_log.user_id` 仍必填 | 流水域待确认 3（已关闭） |
+| D-05 | 保留 `order_item.unit_price`、`orders.total_amount` 快照，并保留 `bouquet.stock_qty` 与 `stock_change` 当前值/流水并存 | 订单域待确认 4（已关闭） |
+| D-06 | 商家账号停用时，同一事务把其在架花束置为“已下架”；历史订单、明细与流水保留，仍可查看与取消。检索条件仍只看 `bouquet.status`，不联表 user | 用户域待确认 4（已关闭） |
 
-### 9.3 提交前待办
+### 9.3 Issue 与完成情况
 
-按 11-17 节点，以下事项需在 ZIP 提交前完成：
+| Issue | 任务 | 结论 |
+|---|---|---|
+| [#9](https://github.com/Longqc666/243-25-project/issues/9) | T4 花束与库存域 | 已完成（`domain-bouquet.md`、`bouquet.md`、概念图与关系图） |
+| [#10](https://github.com/Longqc666/243-25-project/issues/10) | T9 规范化说明 | 已完成（`design-notes.md` v0.2） |
+| [#11](https://github.com/Longqc666/243-25-project/issues/11) | S3 取消后再次下单 | **待林伟翔确认**：草稿已并入 `walkthrough.md` 6.1，组长复核结构无误，但未获本人确认，不计为完成 |
+| [#12](https://github.com/Longqc666/243-25-project/issues/12) | S4 库存不足与并发 | 已完成（`walkthrough.md` 6.3，另含 S5—S7） |
+| [#13](https://github.com/Longqc666/243-25-project/issues/13) | T8 完整表间关系图 | 已完成（`relations.md`、`relations.png`，13 条外键与字典逐条一致） |
+| [#14](https://github.com/Longqc666/243-25-project/issues/14) | T11 交叉互评 | 已完成书面互评三份；`03_实验二_互评与提交记录.docx` 已填，见 9.4 |
+| #15 | T12 个人报告与 ZIP | Issue 已被删除（API 返回 410）；ZIP 待其余三人报告交齐后由组长汇总 |
 
-| 任务 | 内容 | 负责人 | Issue |
-|---|---|---|---|
-| T4 | 花束与库存域表结构、数据字典（`category`、`bouquet`、`bouquet_image`） | 庞延新 | [#9](https://github.com/Longqc666/243-25-project/issues/9) |
-| T9 | 规范化说明汇总（至少 3 张关键表的函数依赖） | 庞延新 | [#10](https://github.com/Longqc666/243-25-project/issues/10) |
-| S3 | 走查：取消后再次下单 | 林伟翔 | [#11](https://github.com/Longqc666/243-25-project/issues/11) |
-| S4 | 走查：库存不足与并发边界 | 庞延新 | [#12](https://github.com/Longqc666/243-25-project/issues/12) |
-| T8 | 完整表间关系图（在 T4 定稿后合并） | 林伟翔 | [#13](https://github.com/Longqc666/243-25-project/issues/13) |
-| T11 | 交叉互评与修订记录 | 全员 | [#14](https://github.com/Longqc666/243-25-project/issues/14) |
-| T12 | 个人报告与 ZIP（`班级_组号_实验二_数据库设计.zip`） | 全员，庞华杰汇总 | [#15](https://github.com/Longqc666/243-25-project/issues/15) |
+### 9.4 互评与提交记录
 
-以上任务已转为 Issue（#9—#15，标签 `实验二`），完成情况在 Issue 与本表同步；关闭 Issue 前须在对应 Issue 留下提交 SHA 与文件路径。
+- 何奕佳 → 庞华杰：`review/user-domain-by-order-2026-11-17.md`，提出 U-01—U-06；庞华杰已在 `user.md` v0.2 逐条处理（DDL 补 REGEXP CHECK、email 定位、W-06 验收、1NF 合并、D-06 结论）。
+- 庞华杰 → 何奕佳：`review/order-domain-by-user-2026-11-17.md`，四项检查 3 项符合、1 条建议（`total_amount` 与明细合计的对账说明）。
+- 庞延新 ↔ 林伟翔：`review/bouquet-order-stock-interface-2026-11-17.md` 记录 14 条接口核对项（I-01—I-14），订单域 v0.3 与流水域 v0.2 已回应主要项。
+- 全组互评与提交记录见 `03_实验二_互评与提交记录.docx`（本地，随 ZIP 提交）。
 
-补充：`er/er-overall.md` 中花束域的实体标注为“待定稿”，T4 提交后只需替换该域字段与状态枚举，用户域与交易域结构不变。
+### 9.5 提交前剩余事项
+
+1. 林伟翔确认或改写 S3（`walkthrough.md` 6.1）；确认后关闭 #11。
+2. 何奕佳、庞延新、林伟翔各自交 `学号_姓名_实验二.docx`，组长按检查表核对后打包 `班级_组号_实验二_数据库设计.zip`。
+3. 打包前将本文件 9.1 的“个人报告”一行改为“四份已收齐”。
