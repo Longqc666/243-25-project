@@ -92,3 +92,10 @@
 - 采用：字段清单与 13 条联系逐条对照 FR、B、NFR 编号后采用；否决 AI 建议的“顾客/商家/管理员三表”方案，改为 `user` 加 `role` 字典；主键类型、状态枚举、流水操作人可空等决定由本人确认后写入 README 9.2。
 - 人工核验：ER 的实体、基数与可选性逐条对照需求与相邻域文件；数据字典与 DDL 只做语法层核对，未执行建表；未编造测试、互评或会议记录。
 - 来源位置：database/er/er-overall.md、database/schema/user.md 及本人实验二报告。
+## 庞华杰 2026-11-18 实验二收尾：合并 ER、互评与报告 v0.2
+
+- 工具与日期：DeepSeek Harness（deepseek-flash），2026-11-18。
+- 输入：庞延新 T4/T9（提交 8951a0d）、林伟翔 T8（提交 68eac08）、订单域 v0.3（ec925a9 等）、何奕佳交叉检查 U-01—U-06、走查 S1—S7。
+- 输出：`er/er-overall.md` 与 PNG v0.2（合并花束域、R7 改 1:1）、`schema/user.md` v0.2（DDL 补 REGEXP CHECK、W-06 验收、D-06）、`review/order-domain-by-user-2026-11-17.md`（对订单域的四项检查）、`database/README.md` v0.3、`walkthrough.md` 组长复核、`03_实验二_互评与提交记录.docx`（本地）、个人报告 v0.2。
+- 采用：U-01/U-02 的 DDL 校验采纳；U-03/U-04/U-05 按建议改写；U-06 由本人定为 D-06（停用联动下架）；O-02 转给何奕佳补充，未代其确认。
+- 人工核验：ER 与四域字典、relations 的 13 条外键逐条对照；未执行 SQL；未代写他人报告、未代签互评结论；S3 保留“待林伟翔确认”标记。
