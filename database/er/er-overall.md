@@ -1,4 +1,4 @@
-﻿# 概念 ER 图（总体）
+﻿﻿# 概念 ER 图（总体）
 
 > 实验二 · 数据库设计 ｜ 主责人：庞华杰（总体框架与合并）｜ 版本 v0.2 · 2026-11-18
 > v0.2 合并花束域（T4）并同步订单域 v0.3 的 1:1 明细约束；花束域不再是待定稿
@@ -24,9 +24,9 @@
 | role 角色 | `id` | code、name | FR-08、B-03 | 庞华杰 | v0.1 |
 | user 用户 | `id` | username（UK）、password_hash、phone（UK）、role_id（FK）、status | FR-08、B-02、NFR-03 | 庞华杰 | v0.1 |
 | seller_profile 商家档案 | `user_id`（PK/FK） | shop_name（UK）、contact_phone、pickup_address | FR-01、FR-04 | 庞华杰 | v0.1 |
-| category 分类 | `id` | name（UK）、sort_no | FR-01、FR-03 | 庞延新 | 待定稿 |
-| bouquet 花束 | `id` | seller_id（FK）、category_id（FK）、name、price、stock_qty、status | FR-01～FR-05 | 庞延新 | 待定稿 |
-| bouquet_image 花束图片 | `id` | bouquet_id（FK）、image_url、sort_no | FR-01、FR-04 | 庞延新 | 待定稿 |
+| category 分类 | `id` | name（UK）、sort_no | FR-01、FR-03 | 庞延新 | v0.1 |
+| bouquet 花束 | `id` | seller_id（FK）、category_id（FK）、name、price、stock_qty、version、status | FR-01～FR-05 | 庞延新 | v0.1 |
+| bouquet_image 花束图片 | `id` | bouquet_id（FK）、image_url、sort_no | FR-01、FR-04 | 庞延新 | v0.1 |
 | orders 订单 | `id` | order_no（UK）、user_id（FK）、status、total_amount、idempotency_key（UK） | FR-05、FR-06、NFR-02 | 何奕佳 | v0.1 |
 | order_item 订单明细 | `id` | order_id（FK）、bouquet_id（FK）、quantity、unit_price | FR-05、B-08 | 何奕佳 | v0.1 |
 | order_status_log 状态流水 | `id` | order_id（FK）、user_id（FK）、from_status、to_status | FR-07、B-06 | 林伟翔 | v0.1 |
@@ -42,7 +42,7 @@
 | R4 | 分类—花束 | 1:N | 花束侧必选 | `bouquet.category_id → category.id` | 一种花束属于一个分类，一个分类含多种花束 |
 | R5 | 花束—花束图片 | 1:0..N | 图片侧必有 | `bouquet_image.bouquet_id → bouquet.id` | 一条发布可有多张图，至少一张（FR-01） |
 | R6 | 用户—订单 | 1:0..N | 订单侧必选 | `orders.user_id → user.id` | 一名顾客可有多笔历史订单；单笔订单必属一名顾客 |
-| R7 | 订单—订单明细 | 1:1..N | 明细侧必有 | `order_item.order_id → orders.id` | 当前一单一花束（N=1），结构预留多花束 |
+| R7 | 订单—订单明细 | 1:1 | 明细侧必有 | `order_item.order_id → orders.id` | 本期一单一花束，`UNIQUE(order_id)` 强制恰好一条明细；扩展多花束时改为 1:N 并同步流水去重粒度 |
 | R8 | 花束—订单明细 | 1:N | 明细侧必选 | `order_item.bouquet_id → bouquet.id` | 一种花束可出现在多条历史订单中；下架不影响历史订单 |
 | R9 | 订单—状态流水 | 1:0..N | 流水侧必有 | `order_status_log.order_id → orders.id` | 每次状态变化写一行，只追加（G3） |
 | R10 | 花束—库存流水 | 1:0..N | 流水侧必有 | `stock_change.bouquet_id → bouquet.id` | 每次剩余量变化写一行，只追加（G3） |
@@ -62,16 +62,18 @@
 
 **（5）状态口径。** `orders.status` 与 `order_status_log.from_status/to_status` 使用同一枚举：有效 / 已取消 / 已完成；“已完成”按 Q-10 仅占位、本期不产生流转。该占位与 Q-10 的“两态”表述存在差异，已登记为待确认项，见 README 决定 D-03。
 
-**（6）操作人关系用虚线。** 流水表的 `user_id` 是审计外键，不是业务归属，画成虚线以免与“顾客下单”混淆。
+**（6）订单明细本期是 1:1。**`order_item` 用 `UNIQUE(order_id)` 强制一笔订单恰好一条明细；`order_item.bouquet_id` 仍指向花束，所以 R8 仍是 1:N，两者不矛盾。
+
+**（7）操作人关系用虚线。** 流水表的 `user_id` 是审计外键，不是业务归属，画成虚线以免与“顾客下单”混淆。
 
 ## 6 与各域文件的一致性
 
 | 域 | 文件 | 本图对应 | 差异或待办 |
 |---|---|---|---|
 | 用户与角色 | [schema/user.md](../schema/user.md) | role、user、seller_profile | 无 |
-| 订单 | [schema/order.md](../schema/order.md) | orders、order_item | 待确认是否增加 `bouquet_name_snapshot`，会影响 order_item 字段 |
+| 订单 | [schema/order.md](../schema/order.md) | orders、order_item | v0.3：`order_item` 以 `UNIQUE(order_id)` 表达 1:1；`orders` 增加 `cancel_idempotency_key`，本图已同步 |
 | 状态与库存流水 | [schema/order-status.md](../schema/order-status.md) | order_status_log、stock_change | 主键类型已由 README 决定统一为 BIGINT，对方待确认项 1 可关闭 |
-| 花束与库存 | [schema/bouquet.md](../schema/bouquet.md) | category、bouquet、bouquet_image | v0.1 已提交，本图已按字典合并：ouquet 增加 ersion，状态枚举与字典一致 |
+| 花束与库存 | [schema/bouquet.md](../schema/bouquet.md) | category、bouquet、bouquet_image | v0.1 已提交，本图已合并：`bouquet` 增加 `version`，状态枚举与字典一致 |
 
 ## 7 待确认项
 
@@ -80,7 +82,7 @@
 | 1 | 花束域字段（颜色、节日档期、图片数量上限） | 已合并 T4 v0.1；颜色/档期按字典为可空字段，不单设字典表 | 若后续改为字典表，需同步 R4 与关系图 |
 | 2 | 是否保存花束名称快照 | 建议追加 `order_item.bouquet_name_snapshot` | 历史订单展示 |
 | 3 | 状态是否保留“已完成” | 按 Q-10 预留不流转，登记教师确认 | 两处 CHECK |
-| 4 | 商家停用后其花束是否仍可被检索 | **已定（D-06）**：停用账号时同事务联动下架其在架花束；检索仍只看 ouquet.status | W-05 走查、花束域状态说明 |
+| 4 | 商家停用后其花束是否仍可被检索 | **已定（D-06）**：停用账号时同事务联动下架其在架花束；检索仍只看 `bouquet`.status | W-05 走查、花束域状态说明 |
 | 5 | 分类是否允许多级 | 当前按单级设计（FR-01 只要求分类） | category 是否加 parent_id |
 
 ---
