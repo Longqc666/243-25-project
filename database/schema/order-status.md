@@ -1,6 +1,6 @@
 # 订单状态与库存流水域 —— 表结构与数据字典
 
-> 实验二 · 数据库设计 ｜ 主责人：林伟翔 ｜ 交叉检查：何奕佳 ｜ 版本 v0.2 · 2026-11-17
+> 实验二 · 数据库设计 ｜ 主责人：林伟翔 ｜ 交叉检查：何奕佳 ｜ 版本 v0.3 · 2026-11-18
 > 依据：[实体清单](../er/domain-order-status.md) v0.1、[database/README.md](../README.md) 建模约定
 > 基线：FR-07（主）、FR-05/06/08；B-05、B-06；NFR-02/03；G3
 
@@ -45,23 +45,24 @@
 
 **表用途**：为每束花的剩余量变化留痕。下单扣减（UC-03）、取消回补（UC-04）、商家调整（FR-02）各写一行；`after_qty >= 0` 与 `UNIQUE(order_id, change_type)` 分别落地 B-05 与 NFR-02/B-06。
 
-| 字段名         | 含义         | 类型与长度                     | 可空 | 默认值            | 约束                                                         | 来源                               |
-| -------------- | ------------ | ------------------------------ | ---- | ----------------- | ------------------------------------------------------------ | ---------------------------------- |
-| id             | 主键         | BIGINT UNSIGNED AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                                  | 建模约定 4                         |
-| bouquet_id     | 花束         | BIGINT UNSIGNED                | 否   | —                 | FOREIGN KEY → bouquet(id)；INDEX                             | B-05；FR-01～04（庞延新域）        |
-| order_id       | 关联订单     | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → orders(id)；**UNIQUE (order_id, change_type)** | FR-05 扣减、FR-07 回补（何奕佳域） |
-| change_type    | 变更类型     | VARCHAR(16)                    | 否   | —                 | CHECK ∈（下单扣减/取消回补/商家调整/初始化）                 | FR-05、FR-07、FR-02                |
-| quantity_delta | 变化量（束） | INT                            | 否   | —                 | 扣减为负、回补为正、调整可正可负                             | B-05；UC-03/04                     |
-| before_qty     | 变更前剩余量 | INT                            | 否   | —                 | —                                                            | G3；走查对照                       |
-| after_qty      | 变更后剩余量 | INT                            | 否   | —                 | **CHECK (after_qty >= 0)**                                   | **B-05**                           |
-| user_id        | 操作人       | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → user(id)                                       | FR-08、FR-02                       |
-| created_at     | 变更时间     | DATETIME                       | 否   | CURRENT_TIMESTAMP | —                                                            | 建模约定 1；G3                     |
+| 字段名         | 含义                                                | 类型与长度                     | 可空 | 默认值            | 约束                                                         | 来源                               |
+| -------------- | --------------------------------------------------- | ------------------------------ | ---- | ----------------- | ------------------------------------------------------------ | ---------------------------------- |
+| id             | 主键                                                | BIGINT UNSIGNED AUTO_INCREMENT | 否   | 自增              | PRIMARY KEY                                                  | 建模约定 4                         |
+| bouquet_id     | 花束                                                | BIGINT UNSIGNED                | 否   | —                 | FOREIGN KEY → bouquet(id)；INDEX                             | B-05；FR-01～04（庞延新域）        |
+| order_id       | 关联订单                                            | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → orders(id)；**UNIQUE (order_id, change_type)** | FR-05 扣减、FR-07 回补（何奕佳域） |
+| change_type    | 变更类型                                            | VARCHAR(16)                    | 否   | —                 | CHECK ∈（下单扣减/取消回补/商家调整/初始化）                 | FR-05、FR-07、FR-02                |
+| quantity_delta | 变化量（束）                                        | INT                            | 否   | —                 | 扣减为负、回补为正、调整可正可负                             | B-05；UC-03/04                     |
+| before_qty     | 该次变更前的实际剩余量（历史行不回写，I-05）        | INT                            | 否   | —                 | CHECK (before_qty >= 0)（I-02）                              | G3；走查对照                       |
+| after_qty      | 变更后剩余量（= before_qty + quantity_delta，I-02） | INT                            | 否   | —                 | **CHECK (after_qty >= 0)**                                   | **B-05**                           |
+| user_id        | 操作人                                              | BIGINT UNSIGNED                | 是   | NULL              | FOREIGN KEY → user(id)                                       | FR-08、FR-02                       |
+| created_at     | 变更时间                                            | DATETIME                       | 否   | CURRENT_TIMESTAMP | —                                                            | 建模约定 1；G3                     |
 
 **其他约束**：
 
 - `UNIQUE (order_id, change_type)`：同一订单至多一条"下单扣减"、至多一条"取消回补"——NFR-02（重复请求只产生一次业务效果）与 B-06（取消仅回补一次）的落点；`order_id IS NULL`（商家调整）的行不参与该约束（MySQL 唯一索引对 NULL 不去重）。
 - `before_qty` 与 `bouquet.stock_qty` 的一致性由同一事务保证（变更与写流水同事务提交）；跨表一致性不由 CHECK 实现（MySQL 限制），应用层责任，见走查说明。
-- 符号约定：下单扣减 delta 为负、取消回补 delta 为正、商家调整可正可负。
+- 符号约定：下单扣减 delta 为负、取消回补 delta 为正、商家调整可正可负；但“初始化”允许 0→0，不统一禁止 delta=0（I-02）。
+- **行内数值约束（I-02）**：CHECK (before_qty >= 0)；CHECK (after_qty = before_qty + quantity_delta)；商家调整（order_id NULL）的防重由独立操作策略负责，不依赖订单流水唯一键。
 
 **示例数据**（走查用）：
 
@@ -76,7 +77,7 @@
 | 本域字段                                              | 引用        | 对方域                 | 待定稿内容                                                   |
 | ----------------------------------------------------- | ----------- | ---------------------- | ------------------------------------------------------------ |
 | `stock_change.bouquet_id`                             | bouquet(id) | 庞延新（花束与库存域） | `bouquet.stock_qty` 每次变化必须有对应流水；`stock_qty >= 0` 与本表 `after_qty >= 0` 双保险 |
-| `order_status_log.order_id` / `stock_change.order_id` | orders(id)  | 何奕佳（订单域）       | `orders.status` 每次变化写日志；`orders.idempotency_key` 唯一约束在 orders 表定义，本域不重复定义 |
+| `order_status_log.order_id` / `stock_change.order_id` | orders(id)  | 何奕佳（订单域）       | `orders.status` 每次变化写日志；下单与取消幂等键（orders.idempotency_key / orders.cancel_idempotency_key）两个唯一约束在 orders 表定义（何奕佳 v0.3，I-04），本域不重复定义 |
 | `user_id`                                             | user(id)    | 庞华杰（用户与角色域） | user 主键类型按 D-01 统一为 BIGINT UNSIGNED                  |
 
 ## 5 约束落点对照（供走查与 ER 图核对）
@@ -94,8 +95,8 @@
 | #    | 问题                                                         | 当前建议                                                     | 影响         |
 | ---- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------ |
 | 1    | ~~主键类型全组统一为 BIGINT 还是 INT~~                       | **已由 D-01 确定：BIGINT UNSIGNED**（2026-11-17 统稿决定，何奕佳订单域 v0.3 已执行） | 全部外键类型 |
-| 2    | `order_status_log.from_status` 首条流水取 NULL 还是占位状态值 | 建议 NULL——约定 3 状态枚举须与用例一致，不引入"新建"等枚举外值 | 字典可空性   |
-| 3    | 系统自动扣减时 `user_id` 填"系统"账号还是 NULL               | 约定系统账号，便于审计                                       | 字典可空性   |
+| 2    | ~~首条流水 from_status 取值~~ **已按 D-03 定稿**：from_status = NULL（无前状态） | 字典可空性                                                   |              |
+| 3    | ~~系统扣减时 user_id 取值~~ **已按 D-04 定稿**：状态日志 user_id 必填；stock_change.user_id 可 NULL，不新建系统账号 | 两表可空性差异                                               |              |
 | 4    | 状态枚举是否预留"已完成"                                     | 按 Q-10 预留，本期不产生流转                                 | 两个 CHECK   |
 
 ## 7 与实验一成果的对应
@@ -103,7 +104,7 @@
 - UC-04 第 6 步（条件更新状态）→ orders 条件更新（何奕佳域）+ 本表 `order_status_log` 插入，同一事务（A6 回滚）。
 - UC-04 第 7 步（回补 +N）→ `stock_change`（取消回补，delta=+N）；AC-UC04-02/08 由 UNIQUE 约束兜底。
 - UC-03 第 7 步（原子扣减）→ `stock_change`（下单扣减，delta=-N）。
-- 本地演示程序（orders.cancelKey/cancelTime 字段）已走查 A1—A6 分支；实验二将 cancelKey 正式化为 `orders.idempotency_key` 唯一约束（何奕佳域）。
+- 本地演示程序（orders.cancelKey/cancelTime 字段）已走查 A1—A6 分支；实验二将 cancelKey 正式化为下单 orders.idempotency_key 与取消 orders.cancel_idempotency_key 两个唯一约束（何奕佳域 v0.3，I-04）。
 
 ---
 
@@ -113,3 +114,4 @@
 | ---- | ---------- | ------------------------------------------------------------ | ------ |
 | v0.1 | 2026-11-14 | 建立 order_status_log 与 stock_change 表结构及数据字典，含约束落点对照与示例数据；外键命名与状态枚举按组长建模约定修订 | 林伟翔 |
 | v0.2 | 2026-11-17 | 按 D-01 统一主外键类型为 BIGINT UNSIGNED，与订单域 v0.3 对齐 | 林伟翔 |
+| v0.3 | 2026-11-18 | 落实接口核对 I-01/02/04/05/11：before/after 时点与等式、下单与取消幂等键分开、按 D-03/D-04 定稿待确认项 2/3 | 林伟翔 |
